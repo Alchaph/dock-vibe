@@ -1,0 +1,208 @@
+/* Windows 8 Metro Logs View */
+
+.logs-view {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.logs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 1.5rem 2rem;
+  background-color: var(--bg-primary);
+  border-left: 4px solid var(--metro-teal);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.logs-header h2 {
+  color: var(--text-primary);
+  font-size: 1.75rem;
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.logs-controls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  padding: 0.625rem 2.5rem 0.625rem 1rem;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+  font-size: 13px;
+  font-family: 'Segoe UI', sans-serif;
+  min-width: 200px;
+  transition: border-color 0.15s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--metro-teal);
+}
+
+.search-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s;
+}
+
+.clear-search-btn:hover {
+  color: var(--text-primary);
+}
+
+.tail-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.25px;
+}
+
+/* Select - Metro style */
+.tail-select {
+  padding: 0.625rem 1rem;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Segoe UI', sans-serif;
+  min-width: 80px;
+  transition: border-color 0.15s;
+}
+
+.tail-select:focus {
+  outline: none;
+  border-color: var(--metro-teal);
+}
+
+.tail-select:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.search-info {
+  background-color: var(--metro-teal);
+  color: var(--text-on-accent);
+  padding: 0.75rem 1.5rem;
+  margin-bottom: 1rem;
+  font-size: 13px;
+}
+
+.search-info strong {
+  font-weight: 700;
+}
+
+/* Logs Container - Metro style */
+.logs-container {
+  background-color: #1E1E1E;
+  border: 1px solid var(--border-color);
+  border-radius: 0;
+  overflow: auto;
+  max-height: calc(100vh - 320px);
+  position: relative;
+}
+
+.logs-content {
+  padding: 1.5rem;
+  margin: 0;
+  font-family: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', 'Fira Code', 'Menlo', 'Monaco', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #E8E8E8;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  background-color: #1E1E1E;
+}
+
+/* Dark mode specific for logs */
+body.dark-mode .logs-content {
+  background-color: #0D0D0D;
+  color: #E8E8E8;
+}
+
+body.dark-mode .logs-container {
+  background-color: #0D0D0D;
+}
+
+/* Search highlighting */
+.logs-content mark {
+  background-color: var(--metro-orange);
+  color: #000000;
+  padding: 2px 0;
+  font-weight: 700;
+  border-radius: 0;
+}
+
+/* Scrollbar - Metro style */
+.logs-content::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+.logs-content::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+
+.logs-content::-webkit-scrollbar-thumb {
+  background: #666666;
+  border-radius: 0;
+  border: 3px solid var(--bg-dark);
+}
+
+.logs-content::-webkit-scrollbar-thumb:hover {
+  background: #888888;
+}
+
+.logs-content::-webkit-scrollbar-corner {
+  background: var(--bg-dark);
+}
+
+/* Error Message - Metro style */
+.error-message {
+  padding: 1.25rem 1.5rem;
+  background-color: var(--metro-red);
+  border-left: none;
+  color: var(--text-on-accent);
+  margin-bottom: 2rem;
+  border-radius: 0;
+  font-size: 13px;
+  font-weight: 600;
+}

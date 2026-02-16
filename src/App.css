@@ -1,0 +1,370 @@
+/* Windows 8 Metro/Modern UI Design */
+
+:root {
+  /* Windows 8 Metro Color Palette */
+  --metro-blue: #0078D7;
+  --metro-green: #00A651;
+  --metro-orange: #FF8C00;
+  --metro-red: #E74856;
+  --metro-purple: #9B4F96;
+  --metro-teal: #00B294;
+  
+  /* Light Mode - Background colors */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F2F2F2;
+  --bg-tertiary: #E6E6E6;
+  --bg-dark: #1E1E1E;
+  
+  /* Light Mode - Text colors */
+  --text-primary: #1E1E1E;
+  --text-secondary: #666666;
+  --text-on-accent: #FFFFFF;
+  
+  /* Light Mode - Border and dividers */
+  --border-color: #D1D1D1;
+  --divider-color: #E0E0E0;
+}
+
+/* Dark Mode Theme */
+body.dark-mode {
+  /* Dark Mode - Background colors */
+  --bg-primary: #1E1E1E;
+  --bg-secondary: #252525;
+  --bg-tertiary: #2D2D2D;
+  
+  /* Dark Mode - Text colors */
+  --text-primary: #FFFFFF;
+  --text-secondary: #B0B0B0;
+  --text-on-accent: #FFFFFF;
+  
+  /* Dark Mode - Border and dividers */
+  --border-color: #3F3F3F;
+  --divider-color: #333333;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+/* Scrollbar styling for light mode */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Dark mode scrollbar */
+body.dark-mode ::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border: 2px solid var(--bg-secondary);
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: var(--border-color);
+}
+
+code {
+  font-family: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', 'Fira Code', 'Menlo', 'Monaco', monospace;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-secondary);
+}
+
+/* Header - Windows 8 style */
+.app-header {
+  background-color: var(--metro-blue);
+  padding: 1.25rem 2rem;
+  border-bottom: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  gap: 2rem;
+}
+
+.app-header h1 {
+  font-size: 1.75rem;
+  margin: 0;
+  color: var(--text-on-accent);
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.main-nav {
+  display: flex;
+  gap: 0;
+  flex: 1;
+}
+
+.nav-btn {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: var(--text-on-accent);
+  padding: 0.75rem 2rem;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  font-family: 'Segoe UI', sans-serif;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.nav-btn.active {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-bottom: 3px solid var(--text-on-accent);
+}
+
+.header-controls {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+/* Checkbox - Windows 8 style */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+  color: var(--text-on-accent);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.checkbox-label input[type="checkbox"] {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--text-on-accent);
+}
+
+.app-main {
+  flex: 1;
+  overflow: auto;
+  padding: 0;
+  background-color: var(--bg-secondary);
+}
+
+/* Error banner - Windows 8 style */
+.error-banner {
+  background-color: var(--metro-red);
+  color: var(--text-on-accent);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: none;
+  font-size: 14px;
+}
+
+/* Info banner - Windows 8 style */
+.info-banner {
+  background-color: var(--metro-blue);
+  color: var(--text-on-accent);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: var(--text-on-accent);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s;
+}
+
+.close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.error-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 3rem;
+  background-color: var(--bg-secondary);
+}
+
+.error-message {
+  text-align: center;
+  max-width: 500px;
+  background-color: var(--bg-primary);
+  padding: 3rem;
+  border-left: 4px solid var(--metro-red);
+}
+
+.error-message h2 {
+  color: var(--metro-red);
+  margin-bottom: 1.5rem;
+  font-weight: 300;
+  font-size: 1.75rem;
+}
+
+.error-message p {
+  margin: 0.75rem 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Button Styles - Windows 8 Metro */
+.btn {
+  padding: 0.625rem 1.5rem;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: background-color 0.15s;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.btn:hover:not(:disabled) {
+  opacity: 1;
+  transform: none;
+  filter: brightness(0.95);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: var(--metro-blue);
+  color: var(--text-on-accent);
+}
+
+.btn-success {
+  background-color: var(--metro-green);
+  color: var(--text-on-accent);
+}
+
+.btn-warning {
+  background-color: var(--metro-orange);
+  color: var(--text-on-accent);
+}
+
+.btn-danger {
+  background-color: var(--metro-red);
+  color: var(--text-on-accent);
+}
+
+.btn-info {
+  background-color: var(--metro-teal);
+  color: var(--text-on-accent);
+}
+
+.btn-secondary {
+  background-color: var(--metro-purple);
+  color: var(--text-on-accent);
+}
+
+.btn-theme-toggle {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: var(--text-on-accent);
+  font-size: 18px;
+  padding: 0.5rem 1rem;
+  min-width: 44px;
+}
+
+.btn-theme-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-sm {
+  padding: 0.4rem 1rem;
+  font-size: 12px;
+}
+
+.loading {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+  font-weight: 300;
+  background-color: var(--bg-primary);
+  margin: 2rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-secondary);
+  background-color: var(--bg-primary);
+  margin: 2rem;
+  border-left: 4px solid var(--metro-blue);
+}
+
+.empty-state h2 {
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+  font-weight: 300;
+  font-size: 1.5rem;
+}
+
+.text-muted {
+  color: var(--text-secondary);
+}

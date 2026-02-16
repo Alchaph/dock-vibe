@@ -1,0 +1,86 @@
+/* Windows 8 Metro Network List */
+
+.network-list {
+  padding: 2rem;
+}
+
+.network-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  background-color: var(--bg-primary);
+  padding: 1.5rem;
+  border-left: 4px solid var(--metro-teal);
+}
+
+.network-list-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 300;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.networks-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+}
+
+.networks-table thead {
+  background-color: var(--metro-teal);
+}
+
+.networks-table th {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-on-accent);
+  border: none;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.networks-table tbody tr {
+  border-bottom: 1px solid var(--divider-color);
+  transition: background-color 0.15s;
+}
+
+.networks-table tbody tr:hover {
+  background-color: var(--bg-secondary);
+}
+
+.networks-table td {
+  padding: 1rem 1.25rem;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.network-name {
+  font-family: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', 'Fira Code', 'Menlo', 'Monaco', monospace;
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.network-id {
+  font-family: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', 'Fira Code', 'Menlo', 'Monaco', monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.error-message {
+  background-color: var(--metro-red);
+  color: var(--text-on-accent);
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  border: none;
+}

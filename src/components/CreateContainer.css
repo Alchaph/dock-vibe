@@ -1,0 +1,207 @@
+/* Windows 8 Metro Create Container */
+
+.create-container-modal {
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.create-container-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-section {
+  background-color: var(--bg-secondary);
+  padding: 1.5rem;
+  border-left: 3px solid var(--metro-green);
+}
+
+.form-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid var(--border-color);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--metro-blue);
+}
+
+.form-help {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Port mappings */
+.port-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.port-row input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid var(--border-color);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.port-row span {
+  color: var(--text-secondary);
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.port-row input:focus {
+  outline: none;
+  border-color: var(--metro-blue);
+}
+
+/* Volume mounts */
+.volume-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.volume-row input[type="text"] {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid var(--border-color);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.volume-row span {
+  color: var(--text-secondary);
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.volume-row input[type="text"]:focus {
+  outline: none;
+  border-color: var(--metro-purple);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--text-primary);
+  text-transform: none;
+  font-weight: normal;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+/* Environment variables */
+.env-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.env-row input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid var(--border-color);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.env-row span {
+  color: var(--text-secondary);
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.env-row input:focus {
+  outline: none;
+  border-color: var(--metro-teal);
+}
+
+/* Remove buttons */
+.btn-remove {
+  padding: 0.5rem 0.75rem;
+  background-color: var(--metro-red);
+  color: var(--text-on-accent);
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: opacity 0.2s;
+  min-width: 36px;
+}
+
+.btn-remove:hover {
+  opacity: 0.8;
+}
+
+.btn-remove:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Error message */
+.error-message {
+  background-color: var(--metro-red);
+  color: var(--text-on-accent);
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  border: none;
+  font-size: 14px;
+}
