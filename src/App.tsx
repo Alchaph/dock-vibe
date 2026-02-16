@@ -192,7 +192,7 @@ function App() {
             className="btn btn-theme-toggle"
             title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           >
-            {darkMode ? '☀' : '☾'}
+            {darkMode ? 'Light' : 'Dark'}
           </button>
         </header>
         <div className="error-container">
@@ -279,7 +279,7 @@ function App() {
             className="btn btn-theme-toggle"
             title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           >
-            {darkMode ? '☀' : '☾'}
+            {darkMode ? 'Light' : 'Dark'}
           </button>
         </div>
       </header>

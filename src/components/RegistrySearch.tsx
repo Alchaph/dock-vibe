@@ -103,7 +103,7 @@ const RegistrySearch: React.FC<RegistrySearchProps> = ({ onClose, onPullImage })
                         )}
                       </div>
                       <div className="result-stars">
-                        ★ {result.star_count}
+                        Stars: {result.star_count}
                       </div>
                     </div>
                     <div className="result-description">

@@ -39,7 +39,7 @@ npm run tauri:dev
 
 ## Test Cases
 
-### Test 1: Docker Connection Check ✓
+### Test 1: Docker Connection Check
 
 **Objective**: Verify the application can connect to Docker daemon
 
@@ -64,7 +64,7 @@ npm run tauri:dev
 
 ---
 
-### Test 2: Container Listing ✓
+### Test 2: Container Listing
 
 **Objective**: Verify containers are listed correctly
 
@@ -93,7 +93,7 @@ npm run tauri:dev
 
 ---
 
-### Test 3: Start/Stop Operations ✓
+### Test 3: Start/Stop Operations
 
 **Objective**: Verify start and stop operations work correctly
 
@@ -130,7 +130,7 @@ npm run tauri:dev
 
 ---
 
-### Test 4: Restart Operation ✓
+### Test 4: Restart Operation
 
 **Objective**: Verify restart operation works
 
@@ -147,7 +147,7 @@ npm run tauri:dev
 
 ---
 
-### Test 5: Pause/Unpause Operations ✓
+### Test 5: Pause/Unpause Operations
 
 **Objective**: Verify pause and unpause operations work
 
@@ -178,7 +178,7 @@ npm run tauri:dev
 
 ---
 
-### Test 6: Remove Container ✓
+### Test 6: Remove Container
 
 **Objective**: Verify container removal works with confirmation
 
@@ -198,7 +198,7 @@ npm run tauri:dev
 
 ---
 
-### Test 7: Container Details View ✓
+### Test 7: Container Details View
 
 **Objective**: Verify detailed container information is displayed correctly
 
@@ -241,7 +241,7 @@ npm run tauri:dev
 
 ---
 
-### Test 8: Container Logs ✓
+### Test 8: Container Logs
 
 **Objective**: Verify log viewing functionality
 
@@ -286,7 +286,7 @@ npm run tauri:dev
 
 ---
 
-### Test 9: Auto-Refresh ✓
+### Test 9: Auto-Refresh
 
 **Objective**: Verify automatic refresh works
 
@@ -305,7 +305,7 @@ npm run tauri:dev
 
 ---
 
-### Test 10: Error Handling ✓
+### Test 10: Error Handling
 
 **Objective**: Verify error messages are user-friendly
 
@@ -342,7 +342,7 @@ npm run tauri:dev
 
 ---
 
-### Test 11: UI/UX Verification ✓
+### Test 11: UI/UX Verification
 
 **Objective**: Verify user interface is intuitive and responsive
 
@@ -365,7 +365,7 @@ npm run tauri:dev
 
 ---
 
-### Test 12: Cross-Platform Testing ✓
+### Test 12: Cross-Platform Testing
 
 **Objective**: Verify application works on all supported platforms
 
@@ -416,26 +416,26 @@ docker rm -f $(docker ps -aq --filter "name=test-alpine-")
 
 | Test ID | Test Name | Status | Notes | Tester | Date |
 |---------|-----------|--------|-------|--------|------|
-| T1 | Docker Connection | ⏳ | | | |
-| T2a | List Running Containers | ⏳ | | | |
-| T2b | List All Containers | ⏳ | | | |
-| T3a | Stop Container | ⏳ | | | |
-| T3b | Start Container | ⏳ | | | |
-| T4 | Restart Container | ⏳ | | | |
-| T5a | Pause Container | ⏳ | | | |
-| T5b | Unpause Container | ⏳ | | | |
-| T6 | Remove Container | ⏳ | | | |
-| T7 | Container Details | ⏳ | | | |
-| T8a | View Logs | ⏳ | | | |
-| T8b | Refresh Logs | ⏳ | | | |
-| T8c | No Logs | ⏳ | | | |
-| T9 | Auto-Refresh | ⏳ | | | |
-| T10a | Docker Stops | ⏳ | | | |
-| T10b | Permission Error | ⏳ | | | |
-| T11 | UI/UX | ⏳ | | | |
-| T12 | Cross-Platform | ⏳ | | | |
+| T1 | Docker Connection | Not Tested | | | |
+| T2a | List Running Containers | Not Tested | | | |
+| T2b | List All Containers | Not Tested | | | |
+| T3a | Stop Container | Not Tested | | | |
+| T3b | Start Container | Not Tested | | | |
+| T4 | Restart Container | Not Tested | | | |
+| T5a | Pause Container | Not Tested | | | |
+| T5b | Unpause Container | Not Tested | | | |
+| T6 | Remove Container | Not Tested | | | |
+| T7 | Container Details | Not Tested | | | |
+| T8a | View Logs | Not Tested | | | |
+| T8b | Refresh Logs | Not Tested | | | |
+| T8c | No Logs | Not Tested | | | |
+| T9 | Auto-Refresh | Not Tested | | | |
+| T10a | Docker Stops | Not Tested | | | |
+| T10b | Permission Error | Not Tested | | | |
+| T11 | UI/UX | Not Tested | | | |
+| T12 | Cross-Platform | Not Tested | | | |
 
-Legend: ✅ Pass | ❌ Fail | ⏳ Not Tested | ⚠️ Partial
+Legend: Pass | Fail | Not Tested | Partial
 
 ---
 
@@ -482,7 +482,7 @@ When reporting issues, include:
 
 ## Sign-Off
 
-**Phase 1 Testing Complete**: ⏳
+**Phase 1 Testing Complete**: Pending
 
 - [ ] All critical tests pass (T1-T8)
 - [ ] Error handling works (T10)
@@ -492,4 +492,4 @@ When reporting issues, include:
 
 **Tested By**: _________________  
 **Date**: _________________  
-**Approved for Release**: ⏳ Yes / ⏳ No
+**Approved for Release**: Pending Yes / Pending No

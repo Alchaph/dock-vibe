@@ -156,10 +156,10 @@ const LogsView = ({ containerId }: LogsViewProps) => {
             </select>
           </label>
           <button onClick={scrollToTop} className="btn btn-secondary btn-sm" title="Scroll to top">
-            ⬆ Top
+            Up
           </button>
           <button onClick={scrollToBottom} className="btn btn-secondary btn-sm" title="Scroll to bottom">
-            ⬇ Bottom
+            Down
           </button>
           <button onClick={copyLogs} className="btn btn-info btn-sm" title="Copy logs">
             Copy

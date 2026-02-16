@@ -94,17 +94,17 @@ npm run tauri:build
 ## Features Overview
 
 ### Container Management
-- ✅ Start/Stop/Restart containers
-- ✅ Pause/Unpause containers
-- ✅ Remove containers
-- ✅ View container details
-- ✅ View container logs
+- Start/Stop/Restart containers
+- Pause/Unpause containers
+- Remove containers
+- View container details
+- View container logs
 
 ### User Interface
-- ✅ Auto-refresh every 5 seconds
-- ✅ Filter running/all containers
-- ✅ Color-coded status indicators
-- ✅ Dark theme
+- Auto-refresh every 5 seconds
+- Filter running/all containers
+- Color-coded status indicators
+- Dark theme
 
 ## Next Steps
 

@@ -7,10 +7,10 @@ The project uses GitHub Actions with the official Tauri action template for **au
 ### How It Works
 
 Every push to the `main` branch automatically:
-1. ✅ Creates a **single draft release** on GitHub
-2. ✅ Builds for **all platforms** in parallel (macOS Intel, macOS Apple Silicon, Linux, Windows)
-3. ✅ Creates installers for each platform
-4. ✅ Uploads all build artifacts to the **same release**
+1. Creates a **single draft release** on GitHub
+2. Builds for **all platforms** in parallel (macOS Intel, macOS Apple Silicon, Linux, Windows)
+3. Creates installers for each platform
+4. Uploads all build artifacts to the **same release**
 
 **Two-Stage Workflow**:
 - **Stage 1**: `create-release` job creates a draft release with tag `v{version}-build{run_number}`
@@ -102,10 +102,10 @@ The automated workflow creates:
 ## Workflow Features
 
 ### Optimizations
-- ✅ **Caching**: npm and Rust dependencies cached for faster builds
-- ✅ **Parallel Builds**: All platforms build simultaneously
-- ✅ **Draft Releases**: Review before publishing
-- ✅ **Universal Binaries**: macOS builds for both architectures
+- **Caching**: npm and Rust dependencies cached for faster builds
+- **Parallel Builds**: All platforms build simultaneously
+- **Draft Releases**: Review before publishing
+- **Universal Binaries**: macOS builds for both architectures
 
 ### Triggers
 The workflow runs on:

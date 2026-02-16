@@ -141,7 +141,7 @@ function ImageList({ onPullImage }: ImageListProps) {
             className="clear-search"
             title="Clear search"
           >
-            ✕
+            X
           </button>
         )}
       </div>

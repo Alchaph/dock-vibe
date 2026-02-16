@@ -139,7 +139,7 @@ function VolumeList() {
                 className="modal-close"
                 onClick={() => setShowCreateModal(false)}
               >
-                ✕
+                X
               </button>
             </div>
             <form onSubmit={handleCreateVolume}>

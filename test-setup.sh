@@ -13,22 +13,22 @@ echo ""
 # Check if Docker is running
 echo "1. Checking Docker installation..."
 if ! command -v docker &> /dev/null; then
-    echo "❌ Docker is not installed. Please install Docker first."
+    echo "[ERROR] Docker is not installed. Please install Docker first."
     exit 1
 fi
 
 if ! docker info &> /dev/null; then
-    echo "❌ Docker daemon is not running. Please start Docker."
+    echo "[ERROR] Docker daemon is not running. Please start Docker."
     exit 1
 fi
 
-echo "✅ Docker is running"
+echo "[OK] Docker is running"
 echo ""
 
 # Clean up existing test containers
 echo "2. Cleaning up existing test containers..."
 docker rm -f test-nginx test-alpine test-postgres test-redis 2>/dev/null || true
-echo "✅ Cleanup complete"
+echo "[OK] Cleanup complete"
 echo ""
 
 # Create test containers
@@ -69,7 +69,7 @@ docker run -d \
   -p 6380:6379 \
   redis:7-alpine
 
-echo "✅ Test containers created"
+echo "[OK] Test containers created"
 echo ""
 
 # Display container status
@@ -149,4 +149,4 @@ echo "4. Clean up test containers when done:"
 echo "   ./test-cleanup.sh"
 echo ""
 
-echo "✅ Test environment ready!"
+echo "[OK] Test environment ready!"

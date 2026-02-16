@@ -157,10 +157,10 @@ const ComposeUpload: React.FC<ComposeUploadProps> = ({ onClose, onSuccess }) => 
                       <div className="result-service">{result.service_name}</div>
                       {result.success ? (
                         <div className="result-status">
-                          ✓ Created (ID: {result.container_id?.substring(0, 12)})
+                          Created (ID: {result.container_id?.substring(0, 12)})
                         </div>
                       ) : (
-                        <div className="result-error">✗ {result.error}</div>
+                        <div className="result-error">Error: {result.error}</div>
                       )}
                     </div>
                   ))}

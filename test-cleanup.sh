@@ -16,7 +16,7 @@ echo "Removing test containers..."
 docker stop test-nginx test-postgres test-redis 2>/dev/null || true
 docker rm -f test-nginx test-alpine test-postgres test-redis 2>/dev/null || true
 
-echo "✅ Test containers removed"
+echo "[OK] Test containers removed"
 echo ""
 
 # Ask about volume cleanup
@@ -25,9 +25,9 @@ echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "Removing test volumes..."
     docker volume rm postgres-test-data 2>/dev/null || true
-    echo "✅ Test volumes removed"
+    echo "[OK] Test volumes removed"
 else
-    echo "⏭️  Test volumes kept"
+    echo "[SKIPPED] Test volumes kept"
 fi
 
 echo ""

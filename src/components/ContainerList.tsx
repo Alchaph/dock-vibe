@@ -104,7 +104,7 @@ const ContainerList = ({ containers, onAction, onViewDetails, onViewLogs, loadin
             className="clear-search"
             title="Clear search"
           >
-            ✕
+            X
           </button>
         )}
       </div>

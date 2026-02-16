@@ -174,7 +174,7 @@ function CreateContainer({ onClose, onCreated, template }: CreateContainerProps)
       <div className="modal-content create-container-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{template ? `Create Container - ${template.name}` : 'Create Container'}</h2>
-          <button className="modal-close" onClick={onClose}>✕</button>
+          <button className="modal-close" onClick={onClose}>X</button>
         </div>
 
         {error && (
@@ -231,7 +231,7 @@ function CreateContainer({ onClose, onCreated, template }: CreateContainerProps)
                   value={port.containerPort}
                   onChange={(e) => updatePort(idx, 'containerPort', e.target.value)}
                 />
-                <button type="button" onClick={() => removePort(idx)} className="btn-remove">✕</button>
+                <button type="button" onClick={() => removePort(idx)} className="btn-remove">X</button>
               </div>
             ))}
             <button type="button" onClick={addPort} className="btn btn-secondary btn-sm">
@@ -264,7 +264,7 @@ function CreateContainer({ onClose, onCreated, template }: CreateContainerProps)
                   />
                   Read-only
                 </label>
-                <button type="button" onClick={() => removeVolume(idx)} className="btn-remove">✕</button>
+                <button type="button" onClick={() => removeVolume(idx)} className="btn-remove">X</button>
               </div>
             ))}
             <button type="button" onClick={addVolume} className="btn btn-secondary btn-sm">
@@ -289,7 +289,7 @@ function CreateContainer({ onClose, onCreated, template }: CreateContainerProps)
                   value={env.value}
                   onChange={(e) => updateEnvVar(idx, 'value', e.target.value)}
                 />
-                <button type="button" onClick={() => removeEnvVar(idx)} className="btn-remove">✕</button>
+                <button type="button" onClick={() => removeEnvVar(idx)} className="btn-remove">X</button>
               </div>
             ))}
             <button type="button" onClick={addEnvVar} className="btn btn-secondary btn-sm">

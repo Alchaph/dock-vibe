@@ -142,7 +142,7 @@ function NetworkList() {
                 className="modal-close"
                 onClick={() => setShowCreateModal(false)}
               >
-                ✕
+                X
               </button>
             </div>
             <form onSubmit={handleCreateNetwork}>
