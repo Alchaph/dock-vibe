@@ -89,6 +89,11 @@ export const dockerApi = {
     return invoke<string>('create_container', { request });
   },
 
+  // Create and immediately start a container
+  async createAndStartContainer(request: CreateContainerRequest): Promise<string> {
+    return invoke<string>('create_and_start_container', { request });
+  },
+
   // Docker Compose
   async deployCompose(yamlContent: string): Promise<ComposeDeployResult[]> {
     return invoke<ComposeDeployResult[]>('deploy_compose', { yamlContent });

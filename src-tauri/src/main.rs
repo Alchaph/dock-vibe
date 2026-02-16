@@ -666,6 +666,20 @@ async fn create_container(state: State<'_, DockerState>, request: CreateContaine
     Ok(container.id)
 }
 
+#[tauri::command]
+async fn create_and_start_container(state: State<'_, DockerState>, request: CreateContainerRequest) -> Result<String, String> {
+    // First, create the container
+    let container_id = create_container(state.clone(), request).await?;
+    
+    // Then, start it immediately
+    let docker = state.docker.lock().await;
+    docker.start_container::<String>(&container_id, None)
+        .await
+        .map_err(|e| format!("Failed to start container after creation: {}", e))?;
+    
+    Ok(container_id)
+}
+
 // Docker Compose structures
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct ComposeService {
@@ -983,6 +997,7 @@ fn main() {
             create_network,
             remove_network,
             create_container,
+            create_and_start_container,
             deploy_compose,
             check_image_exists,
             search_docker_hub,

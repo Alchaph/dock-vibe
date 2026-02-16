@@ -152,7 +152,13 @@ function CreateContainer({ onClose, onCreated, template }: CreateContainerProps)
         cpu_quota: cpuQuota,
       };
 
-      await dockerApi.createContainer(request);
+      // If created from a template, create AND start the container
+      // Otherwise just create it (user can manually start it)
+      if (template) {
+        await dockerApi.createAndStartContainer(request);
+      } else {
+        await dockerApi.createContainer(request);
+      }
       onCreated();
       onClose();
     } catch (err) {
