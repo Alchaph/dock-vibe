@@ -13,7 +13,8 @@
 
 .compose-upload-modal {
   background: var(--bg-primary);
-  border: 2px solid var(--orange);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   width: 90%;
   max-width: 700px;
   max-height: 80vh;
@@ -22,39 +23,41 @@
 }
 
 .compose-upload-header {
-  background: var(--orange);
-  color: var(--text-dark);
-  padding: 15px 20px;
+  background: var(--metro-orange);
+  color: var(--text-on-accent);
+  padding: 1.25rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid var(--bg-secondary);
+  border-bottom: none;
 }
 
 .compose-upload-header h2 {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .close-button {
   background: transparent;
   border: none;
-  color: var(--text-dark);
+  color: var(--text-on-accent);
   font-size: 2rem;
   cursor: pointer;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
   padding: 0;
-  transition: opacity 0.2s;
+  transition: background-color 0.15s;
 }
 
 .close-button:hover {
-  opacity: 0.7;
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .compose-upload-body {
@@ -69,24 +72,36 @@
 
 .file-upload-label {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 0.5rem;
   color: var(--text-primary);
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 .file-input {
   display: block;
   width: 100%;
-  padding: 10px;
-  background: var(--bg-secondary);
+  padding: 0.75rem;
+  background: var(--bg-primary);
   border: 2px solid var(--border-color);
+  border-radius: 0;
   color: var(--text-primary);
-  font-family: inherit;
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 14px;
   cursor: pointer;
+  transition: border-color 0.2s;
 }
 
 .file-input:hover {
-  border-color: var(--orange);
+  border-color: var(--metro-orange);
+}
+
+.file-input:focus {
+  outline: none;
+  border-color: var(--metro-orange);
+  box-shadow: 0 0 0 1px var(--metro-orange);
 }
 
 .yaml-preview {
@@ -103,12 +118,15 @@
 .yaml-preview pre {
   background: var(--bg-secondary);
   border: 2px solid var(--border-color);
-  padding: 15px;
+  border-radius: 0;
+  padding: 1rem;
   overflow-x: auto;
   max-height: 300px;
   color: var(--text-primary);
   font-size: 0.85rem;
+  font-family: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', 'Fira Code', monospace;
   margin: 0;
+  line-height: 1.5;
 }
 
 .button-group {
@@ -119,18 +137,25 @@
 }
 
 .btn-primary {
-  background: var(--orange);
-  color: var(--text-dark);
+  background: var(--metro-orange);
+  color: var(--text-on-accent);
   border: none;
-  padding: 12px 24px;
-  font-size: 1rem;
+  border-radius: 0;
+  padding: 0.75rem 1.5rem;
+  font-size: 13px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: background-color 0.15s ease;
 }
 
 .btn-primary:hover:not(:disabled) {
-  opacity: 0.9;
+  background-color: #E67E00;
+}
+
+.btn-primary:active:not(:disabled) {
+  background-color: #CC7000;
 }
 
 .btn-primary:disabled {
@@ -139,18 +164,21 @@
 }
 
 .btn-secondary {
-  background: var(--bg-secondary);
+  background: var(--bg-tertiary);
   color: var(--text-primary);
-  border: 2px solid var(--border-color);
-  padding: 12px 24px;
-  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0;
+  padding: 0.75rem 1.5rem;
+  font-size: 13px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: background-color 0.15s ease;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  border-color: var(--orange);
+  background-color: var(--bg-secondary);
 }
 
 .btn-secondary:disabled {
@@ -159,11 +187,15 @@
 }
 
 .error-message {
-  background: #dc3545;
-  color: white;
-  padding: 12px;
-  margin-bottom: 15px;
-  border-left: 4px solid #a71d2a;
+  background: var(--metro-red);
+  color: var(--text-on-accent);
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  border: none;
+  border-left: 4px solid #B82030;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
 }
 
 .deploy-results {
