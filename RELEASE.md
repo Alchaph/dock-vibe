@@ -7,10 +7,16 @@ The project uses GitHub Actions with the official Tauri action template for **au
 ### How It Works
 
 Every push to the `main` branch automatically:
-1. ✅ Builds for **all platforms** (macOS Intel, macOS Apple Silicon, Linux, Windows)
-2. ✅ Creates installers for each platform
-3. ✅ Generates a **draft release** on GitHub
-4. ✅ Uploads all build artifacts to the release
+1. ✅ Creates a **single draft release** on GitHub
+2. ✅ Builds for **all platforms** in parallel (macOS Intel, macOS Apple Silicon, Linux, Windows)
+3. ✅ Creates installers for each platform
+4. ✅ Uploads all build artifacts to the **same release**
+
+**Two-Stage Workflow**:
+- **Stage 1**: `create-release` job creates a draft release with tag `v{version}-build{run_number}`
+- **Stage 2**: `build-tauri` jobs build for each platform and upload artifacts to the release
+
+This ensures all platform builds upload to one unified release instead of creating duplicates.
 
 ### Platforms Built
 
