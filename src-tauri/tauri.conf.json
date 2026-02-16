@@ -43,6 +43,9 @@
     "linux": {
       "deb": {
         "depends": []
+      },
+      "appimage": {
+        "bundleMediaFramework": true
       }
     }
   },
