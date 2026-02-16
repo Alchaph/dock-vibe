@@ -1,7 +1,10 @@
 {
   "name": "dock",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "Modern cross-platform Docker GUI manager",
+  "author": "Dock Team",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
