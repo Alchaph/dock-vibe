@@ -13,13 +13,13 @@ import Templates, { type ContainerTemplate } from './components/Templates';
 import ComposeUpload from './components/ComposeUpload';
 import './App.css';
 
-type View = 'list' | 'details' | 'logs' | 'images' | 'volumes' | 'networks' | 'templates';
+type View = 'templates' | 'list' | 'details' | 'logs' | 'images' | 'volumes' | 'networks';
 
 function App() {
   const [containers, setContainers] = useState<ContainerInfo[]>([]);
   const [selectedContainer, setSelectedContainer] = useState<string | null>(null);
   const [containerDetails, setContainerDetails] = useState<ContainerDetails | null>(null);
-  const [currentView, setCurrentView] = useState<View>('list');
+  const [currentView, setCurrentView] = useState<View>('templates');
   const [showAll, setShowAll] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -215,6 +215,12 @@ function App() {
         <h1>DOCK</h1>
         <nav className="main-nav">
           <button 
+            onClick={() => setCurrentView('templates')}
+            className={`nav-btn ${currentView === 'templates' ? 'active' : ''}`}
+          >
+            Templates
+          </button>
+          <button 
             onClick={() => setCurrentView('list')}
             className={`nav-btn ${currentView === 'list' ? 'active' : ''}`}
           >
@@ -237,12 +243,6 @@ function App() {
             className={`nav-btn ${currentView === 'networks' ? 'active' : ''}`}
           >
             Networks
-          </button>
-          <button 
-            onClick={() => setCurrentView('templates')}
-            className={`nav-btn ${currentView === 'templates' ? 'active' : ''}`}
-          >
-            Templates
           </button>
         </nav>
         <div className="header-controls">

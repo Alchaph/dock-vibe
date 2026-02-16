@@ -49,7 +49,8 @@ function CreateContainer({ onClose, onCreated, template }: CreateContainerProps)
     try {
       const imageList = await dockerApi.listImages();
       setImages(imageList);
-      if (imageList.length > 0 && imageList[0].repo_tags.length > 0) {
+      // Only set default image if no template was provided
+      if (!template && imageList.length > 0 && imageList[0].repo_tags.length > 0) {
         setSelectedImage(imageList[0].repo_tags[0]);
       }
     } catch (err) {

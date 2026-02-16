@@ -1,6 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod validation;
+
 use bollard::Docker;
 use bollard::container::{ListContainersOptions, RemoveContainerOptions, LogsOptions, StartContainerOptions, StatsOptions, CreateContainerOptions, Config};
 use bollard::image::{ListImagesOptions, RemoveImageOptions};
@@ -566,6 +568,55 @@ async fn remove_network(state: State<'_, DockerState>, id: String) -> Result<(),
 // Container Creation
 #[tauri::command]
 async fn create_container(state: State<'_, DockerState>, request: CreateContainerRequest) -> Result<String, String> {
+    // Input validation
+    validation::validate_image_name(&request.image)?;
+    
+    if let Some(ref name) = request.name {
+        validation::validate_name(name)?;
+    }
+    
+    if let Some(ref network) = request.network {
+        validation::validate_network_name(network)?;
+    }
+    
+    // Validate environment variables
+    if let Some(ref env_vars) = request.env {
+        for env_var in env_vars {
+            if let Some(key) = env_var.split('=').next() {
+                validation::validate_env_key(key)?;
+            }
+        }
+    }
+    
+    // Validate ports
+    if let Some(ref ports) = request.ports {
+        for (container_port, host_port) in ports {
+            // Extract port number from format like "80/tcp"
+            let port_num = container_port.split('/').next().unwrap_or(container_port);
+            validation::validate_port_string(port_num)?;
+            validation::validate_port_string(host_port)?;
+        }
+    }
+    
+    // Validate volume paths
+    if let Some(ref volumes) = request.volumes {
+        for volume_spec in volumes {
+            let parts: Vec<&str> = volume_spec.split(':').collect();
+            if parts.len() >= 2 {
+                let source = parts[0];
+                let target = parts[1];
+                
+                // Validate source if it's a path (not a volume name)
+                if source.starts_with('/') || source.starts_with('.') || source.contains('\\') {
+                    validation::validate_volume_path(source)?;
+                }
+                
+                // Always validate target path
+                validation::validate_volume_path(target)?;
+            }
+        }
+    }
+    
     let docker = state.docker.lock().await;
     
     // Parse port bindings

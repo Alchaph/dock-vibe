@@ -25,6 +25,7 @@ urlencoding = "2.1"
 bollard = "0.17"
 tokio = { version = "1", features = ["full"] }
 futures-util = "0.3"
+regex = "1.10"
 
 [target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
 tauri-plugin-shell = "2"
