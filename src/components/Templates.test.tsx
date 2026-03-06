@@ -5,15 +5,16 @@ import Templates from './Templates';
 
 describe('Templates', () => {
   const onUseTemplate = vi.fn();
+  const mockOnToast = vi.fn();
 
   it('renders templates heading', () => {
-    render(<Templates onUseTemplate={onUseTemplate} />);
+    render(<Templates onUseTemplate={onUseTemplate} onToast={mockOnToast} />);
 
     expect(screen.getByText('Container Templates')).toBeInTheDocument();
   });
 
   it('shows built-in templates', () => {
-    render(<Templates onUseTemplate={onUseTemplate} />);
+    render(<Templates onUseTemplate={onUseTemplate} onToast={mockOnToast} />);
 
     expect(screen.getByText('PostgreSQL')).toBeInTheDocument();
     expect(screen.getByText('MySQL')).toBeInTheDocument();
@@ -23,14 +24,14 @@ describe('Templates', () => {
   });
 
   it('shows template descriptions', () => {
-    render(<Templates onUseTemplate={onUseTemplate} />);
+    render(<Templates onUseTemplate={onUseTemplate} onToast={mockOnToast} />);
 
     expect(screen.getByText('PostgreSQL relational database')).toBeInTheDocument();
     expect(screen.getByText('In-memory data structure store')).toBeInTheDocument();
   });
 
   it('calls onUseTemplate when Use Template button is clicked', async () => {
-    render(<Templates onUseTemplate={onUseTemplate} />);
+    render(<Templates onUseTemplate={onUseTemplate} onToast={mockOnToast} />);
 
     const useButtons = screen.getAllByText('Use Template');
     await userEvent.click(useButtons[0]);
@@ -45,7 +46,7 @@ describe('Templates', () => {
   });
 
   it('has category filter buttons', () => {
-    render(<Templates onUseTemplate={onUseTemplate} />);
+    render(<Templates onUseTemplate={onUseTemplate} onToast={mockOnToast} />);
 
     expect(screen.getByText('All Templates')).toBeInTheDocument();
     expect(screen.getByText('Databases')).toBeInTheDocument();
@@ -53,7 +54,7 @@ describe('Templates', () => {
   });
 
   it('filters by category', async () => {
-    render(<Templates onUseTemplate={onUseTemplate} />);
+    render(<Templates onUseTemplate={onUseTemplate} onToast={mockOnToast} />);
 
     await userEvent.click(screen.getByText('Databases'));
 
@@ -64,20 +65,20 @@ describe('Templates', () => {
   });
 
   it('shows template card structure', () => {
-    render(<Templates onUseTemplate={onUseTemplate} />);
+    render(<Templates onUseTemplate={onUseTemplate} onToast={mockOnToast} />);
 
     const postgresCard = screen.getByText('PostgreSQL').closest('.template-card');
     expect(postgresCard).toBeInTheDocument();
   });
 
   it('has import template button', () => {
-    render(<Templates onUseTemplate={onUseTemplate} />);
+    render(<Templates onUseTemplate={onUseTemplate} onToast={mockOnToast} />);
 
     expect(screen.getByText('Import Template')).toBeInTheDocument();
   });
 
   it('shows all category options', () => {
-    render(<Templates onUseTemplate={onUseTemplate} />);
+    render(<Templates onUseTemplate={onUseTemplate} onToast={mockOnToast} />);
 
     expect(screen.getByText('Caching')).toBeInTheDocument();
     expect(screen.getByText('Runtimes')).toBeInTheDocument();
@@ -89,7 +90,7 @@ describe('Templates', () => {
   });
 
   it('returns to all templates when clicking All Templates', async () => {
-    render(<Templates onUseTemplate={onUseTemplate} />);
+    render(<Templates onUseTemplate={onUseTemplate} onToast={mockOnToast} />);
 
     await userEvent.click(screen.getByText('Databases'));
     expect(screen.queryByText('Nginx')).not.toBeInTheDocument();

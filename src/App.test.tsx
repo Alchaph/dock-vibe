@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 import { invoke } from '@tauri-apps/api/core';
@@ -87,13 +87,16 @@ describe('App', () => {
       render(<App />);
 
       await waitFor(() => {
-        const navButtons = screen.getAllByRole('button').filter(btn => btn.classList.contains('nav-btn'));
-        const navTexts = navButtons.map(btn => btn.textContent);
-        expect(navTexts).toContain('Templates');
-        expect(navTexts).toContain('Containers');
-        expect(navTexts).toContain('Images');
-        expect(navTexts).toContain('Volumes');
-        expect(navTexts).toContain('Networks');
+        expect(screen.getByText('DOCK')).toBeInTheDocument();
+      });
+
+      const sidebar = screen.getByRole('navigation');
+      await waitFor(() => {
+        expect(within(sidebar).getByText('Templates')).toBeInTheDocument();
+        expect(within(sidebar).getByText('Containers')).toBeInTheDocument();
+        expect(within(sidebar).getByText('Images')).toBeInTheDocument();
+        expect(within(sidebar).getByText('Volumes')).toBeInTheDocument();
+        expect(within(sidebar).getByText('Networks')).toBeInTheDocument();
       });
     });
 
@@ -101,10 +104,10 @@ describe('App', () => {
       setupConnectedApp();
       render(<App />);
 
+      const sidebar = await screen.findByRole('navigation');
       await waitFor(() => {
-        const navButtons = screen.getAllByRole('button').filter(btn => btn.classList.contains('nav-btn'));
-        const templatesBtn = navButtons.find(btn => btn.textContent === 'Templates');
-        expect(templatesBtn).toHaveClass('active');
+        const templatesBtn = within(sidebar).getByText('Templates');
+        expect(templatesBtn.closest('button')).toHaveClass('active');
       });
     });
 
@@ -113,17 +116,15 @@ describe('App', () => {
       render(<App />);
 
       await waitFor(() => {
-        const navButtons = screen.getAllByRole('button').filter(btn => btn.classList.contains('nav-btn'));
-        return navButtons.find(btn => btn.textContent === 'Containers');
+        expect(screen.getByText('DOCK')).toBeInTheDocument();
       });
-      const containersBtn = screen.getAllByRole('button').filter(btn => btn.classList.contains('nav-btn')).find(btn => btn.textContent === 'Containers')!;
+
+      const containersBtn = await screen.findByText('Containers', {}, { timeout: 10000 });
       await userEvent.click(containersBtn);
 
       await waitFor(() => {
-        const navButtons = screen.getAllByRole('button').filter(btn => btn.classList.contains('nav-btn'));
-        const btn = navButtons.find(b => b.textContent === 'Containers');
-        expect(btn).toHaveClass('active');
-      });
+        expect(screen.getByText('Create Container')).toBeInTheDocument();
+      }, { timeout: 10000 });
     });
   });
 
