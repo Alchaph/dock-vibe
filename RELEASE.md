@@ -188,7 +188,7 @@ Examples:
 Before publishing a release:
 
 - [ ] Version numbers updated in all 3 files
-- [ ] IMPLEMENTATION.md updated with changes
+- [ ] README.md updated with changes
 - [ ] All tests passing (`npm run test:e2e`)
 - [ ] Build successful on all platforms
 - [ ] Release notes written
