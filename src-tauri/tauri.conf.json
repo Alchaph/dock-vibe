@@ -35,10 +35,18 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
+    "macOS": {
+      "minimumSystemVersion": "10.15",
+      "signingIdentity": null,
+      "entitlements": null
+    },
     "windows": {
       "certificateThumbprint": null,
       "digestAlgorithm": "sha256",
-      "timestampUrl": ""
+      "timestampUrl": "http://timestamp.digicert.com",
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      }
     },
     "linux": {
       "deb": {
@@ -47,7 +55,12 @@
       "appimage": {
         "bundleMediaFramework": true
       }
-    }
+    },
+    "category": "DeveloperTool",
+    "shortDescription": "Docker & Podman GUI Manager",
+    "longDescription": "Modern cross-platform desktop application for managing Docker and Podman containers with an intuitive interface.",
+    "copyright": "Copyright (c) 2024 Dock",
+    "publisher": "Dock"
   },
   "plugins": {
     "shell": {
