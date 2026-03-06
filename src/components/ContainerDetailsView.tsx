@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { open } from '@tauri-apps/plugin-shell';
 import type { ContainerDetails, ContainerStats } from '../types';
 import { dockerApi } from '../api';
 import './ContainerDetails.css';
@@ -160,6 +161,7 @@ const ContainerDetailsView = ({ details, onAction }: ContainerDetailsViewProps) 
                   <th>Container Port</th>
                   <th>Host Port</th>
                   <th>Type</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -168,6 +170,19 @@ const ContainerDetailsView = ({ details, onAction }: ContainerDetailsViewProps) 
                     <td>{port.private_port}</td>
                     <td>{port.public_port || '-'}</td>
                     <td>{port.port_type}</td>
+                    <td>
+                      {port.public_port ? (
+                        <button
+                          className="btn btn-sm btn-primary"
+                          onClick={() => open(`http://localhost:${port.public_port}`)}
+                          title={`Open http://localhost:${port.public_port}`}
+                        >
+                          Open
+                        </button>
+                      ) : (
+                        <span className="text-muted">-</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

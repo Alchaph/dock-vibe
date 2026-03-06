@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { open } from '@tauri-apps/plugin-shell';
 import type { ContainerInfo } from '../types';
 import './ContainerList.css';
 
@@ -151,9 +152,23 @@ const ContainerList = ({ containers, onAction, onViewDetails, onViewLogs, loadin
                 {container.ports.length > 0 ? (
                   <div className="ports-list">
                     {container.ports.slice(0, 2).map((port, idx) => (
-                      <span key={idx} className="port-badge">
-                        {port.public_port ? `${port.public_port}:${port.private_port}` : port.private_port}
-                      </span>
+                      port.public_port ? (
+                        <button
+                          key={idx}
+                          className="port-badge port-badge-link"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            open(`http://localhost:${port.public_port}`);
+                          }}
+                          title={`Open http://localhost:${port.public_port} in browser`}
+                        >
+                          {port.public_port}:{port.private_port}
+                        </button>
+                      ) : (
+                        <span key={idx} className="port-badge">
+                          {port.private_port}
+                        </span>
+                      )
                     ))}
                     {container.ports.length > 2 && (
                       <span className="port-badge">+{container.ports.length - 2}</span>

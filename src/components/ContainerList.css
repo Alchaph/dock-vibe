@@ -263,6 +263,21 @@
   letter-spacing: 0.25px;
 }
 
+.port-badge-link {
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.port-badge-link:hover {
+  background-color: var(--metro-blue-hover, #1a5fa8);
+  transform: translateY(-1px);
+}
+
+.port-badge-link:active {
+  transform: translateY(0);
+}
+
 .date-cell {
   color: var(--text-secondary);
   font-size: 12px;
