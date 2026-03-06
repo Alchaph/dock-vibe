@@ -12,9 +12,10 @@ import NetworkList from './components/NetworkList';
 import CreateContainer from './components/CreateContainer';
 import Templates, { type ContainerTemplate } from './components/Templates';
 import ComposeUpload from './components/ComposeUpload';
+import Terminal from './components/Terminal';
 import './App.css';
 
-type View = 'templates' | 'list' | 'details' | 'logs' | 'images' | 'volumes' | 'networks';
+type View = 'templates' | 'list' | 'details' | 'logs' | 'terminal' | 'images' | 'volumes' | 'networks';
 
 function App() {
   const [containers, setContainers] = useState<ContainerInfo[]>([]);
@@ -89,6 +90,26 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showAll, dockerConnected]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) {
+        return;
+      }
+      
+      switch (e.key) {
+        case '1': setCurrentView('templates'); break;
+        case '2': setCurrentView('list'); break;
+        case '3': setCurrentView('images'); break;
+        case '4': setCurrentView('volumes'); break;
+        case '5': setCurrentView('networks'); break;
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleContainerAction = async (action: string, id: string) => {
     try {
       setError(null);
@@ -115,6 +136,10 @@ function App() {
             setCurrentView('list');
           }
           break;
+        case 'terminal':
+          setSelectedContainer(id);
+          setCurrentView('terminal');
+          return;
       }
       await loadContainers();
     } catch (err) {
@@ -201,95 +226,86 @@ function App() {
   if (!dockerConnected) {
     return (
       <div className="app">
-        <header className="app-header">
-          <h1>DOCK</h1>
-          <button 
-            onClick={() => setDarkMode(!darkMode)} 
-            className="btn btn-theme-toggle"
-            title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-          >
-            {darkMode ? 'Light' : 'Dark'}
-          </button>
-        </header>
-        <div className="error-container">
-          <div className="error-message">
-            <h2>Docker Connection Failed</h2>
-            <p>{error || 'Unable to connect to Docker daemon.'}</p>
-            <p>Please make sure Docker is installed and running.</p>
-            <button onClick={checkDockerConnection} className="btn btn-primary">
-              Retry Connection
+        <aside className="sidebar">
+          <div className="sidebar-header">
+            <h1>DOCK</h1>
+          </div>
+          <div className="sidebar-footer">
+            <button 
+              onClick={() => setDarkMode(!darkMode)} 
+              className="btn btn-theme-toggle"
+              title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {darkMode ? 'Light' : 'Dark'}
             </button>
           </div>
-        </div>
+        </aside>
+        <main className="main-content">
+          <div className="error-container">
+            <div className="error-message">
+              <h2>Docker Connection Failed</h2>
+              <p>{error || 'Unable to connect to Docker daemon.'}</p>
+              <p>Please make sure Docker is installed and running.</p>
+              <button onClick={checkDockerConnection} className="btn btn-primary">
+                Retry Connection
+              </button>
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
 
   return (
     <div className="app">
-      <header className="app-header">
-        <h1>DOCK</h1>
+      <aside className="sidebar">
+        <div className="sidebar-header">
+          <h1>DOCK</h1>
+        </div>
         <nav className="main-nav">
-          <button 
-            onClick={() => setCurrentView('templates')}
-            className={`nav-btn ${currentView === 'templates' ? 'active' : ''}`}
-          >
-            Templates
-          </button>
-          <button 
-            onClick={() => setCurrentView('list')}
-            className={`nav-btn ${currentView === 'list' ? 'active' : ''}`}
-          >
-            Containers
-          </button>
-          <button 
-            onClick={() => setCurrentView('images')}
-            className={`nav-btn ${currentView === 'images' ? 'active' : ''}`}
-          >
-            Images
-          </button>
-          <button 
-            onClick={() => setCurrentView('volumes')}
-            className={`nav-btn ${currentView === 'volumes' ? 'active' : ''}`}
-          >
-            Volumes
-          </button>
-          <button 
-            onClick={() => setCurrentView('networks')}
-            className={`nav-btn ${currentView === 'networks' ? 'active' : ''}`}
-          >
-            Networks
-          </button>
+          <div className="nav-item-wrapper">
+            <button 
+              onClick={() => setCurrentView('templates')}
+              className={`nav-btn ${currentView === 'templates' ? 'active' : ''}`}
+            >
+              Templates
+            </button>
+          </div>
+          <div className="nav-item-wrapper">
+            <button 
+              onClick={() => setCurrentView('list')}
+              className={`nav-btn ${currentView === 'list' ? 'active' : ''}`}
+            >
+              Containers
+            </button>
+            <span className="nav-badge">{containers.length}</span>
+          </div>
+          <div className="nav-item-wrapper">
+            <button 
+              onClick={() => setCurrentView('images')}
+              className={`nav-btn ${currentView === 'images' ? 'active' : ''}`}
+            >
+              Images
+            </button>
+          </div>
+          <div className="nav-item-wrapper">
+            <button 
+              onClick={() => setCurrentView('volumes')}
+              className={`nav-btn ${currentView === 'volumes' ? 'active' : ''}`}
+            >
+              Volumes
+            </button>
+          </div>
+          <div className="nav-item-wrapper">
+            <button 
+              onClick={() => setCurrentView('networks')}
+              className={`nav-btn ${currentView === 'networks' ? 'active' : ''}`}
+            >
+              Networks
+            </button>
+          </div>
         </nav>
-        <div className="header-controls">
-          {currentView === 'list' && (
-            <>
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={showAll}
-                  onChange={(e) => setShowAll(e.target.checked)}
-                />
-                Show all containers
-              </label>
-              <button onClick={() => setShowComposeUpload(true)} className="btn btn-secondary">
-                Import Compose
-              </button>
-              <button onClick={() => setShowCreateContainer(true)} className="btn btn-primary">
-                Create Container
-              </button>
-            </>
-          )}
-          {currentView === 'details' || currentView === 'logs' ? (
-            <button onClick={handleBackToList} className="btn btn-secondary">
-              Back to List
-            </button>
-          ) : null}
-          {currentView === 'list' && (
-            <button onClick={loadContainers} className="btn btn-primary" disabled={loading}>
-              {loading ? 'Refreshing...' : 'Refresh'}
-            </button>
-          )}
+        <div className="sidebar-footer">
           <button 
             onClick={() => setDarkMode(!darkMode)} 
             className="btn btn-theme-toggle"
@@ -298,28 +314,89 @@ function App() {
             {darkMode ? 'Light' : 'Dark'}
           </button>
         </div>
-      </header>
+      </aside>
 
-      {error && (
-        <div className="error-banner">
-          {error}
-          <button onClick={() => setError(null)} className="close-btn">×</button>
-        </div>
-      )}
+      <div className="main-content">
+        <header className="content-header">
+          <div className="breadcrumbs">
+            {currentView === 'details' && (
+              <>
+                <span className="breadcrumb-link" onClick={() => setCurrentView('list')}>Containers</span>
+                <span className="breadcrumb-separator">&gt;</span>
+                <span className="breadcrumb-current">{containerDetails?.name?.replace(/^\//, '') || selectedContainer?.substring(0, 12)}</span>
+              </>
+            )}
+            {currentView === 'logs' && (
+              <>
+                <span className="breadcrumb-link" onClick={() => setCurrentView('list')}>Containers</span>
+                <span className="breadcrumb-separator">&gt;</span>
+                <span className="breadcrumb-link" onClick={() => setCurrentView('details')}>{containerDetails?.name?.replace(/^\//, '') || selectedContainer?.substring(0, 12)}</span>
+                <span className="breadcrumb-separator">&gt;</span>
+                <span className="breadcrumb-current">Logs</span>
+              </>
+            )}
+            {currentView === 'terminal' && (
+              <>
+                <span className="breadcrumb-link" onClick={() => setCurrentView('list')}>Containers</span>
+                <span className="breadcrumb-separator">&gt;</span>
+                <span className="breadcrumb-link" onClick={() => setCurrentView('details')}>{containerDetails?.name?.replace(/^\//, '') || selectedContainer?.substring(0, 12)}</span>
+                <span className="breadcrumb-separator">&gt;</span>
+                <span className="breadcrumb-current">Terminal</span>
+              </>
+            )}
+          </div>
+          <div className="header-controls">
+            {currentView === 'list' && (
+              <>
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={showAll}
+                    onChange={(e) => setShowAll(e.target.checked)}
+                  />
+                  Show all containers
+                </label>
+                <button onClick={() => setShowComposeUpload(true)} className="btn btn-secondary">
+                  Import Compose
+                </button>
+                <button onClick={() => setShowCreateContainer(true)} className="btn btn-primary">
+                  Create Container
+                </button>
+              </>
+            )}
+            {currentView === 'details' || currentView === 'logs' || currentView === 'terminal' ? (
+              <button onClick={handleBackToList} className="btn btn-secondary">
+                Back to List
+              </button>
+            ) : null}
+            {currentView === 'list' && (
+              <button onClick={loadContainers} className="btn btn-primary" disabled={loading}>
+                {loading ? 'Refreshing...' : 'Refresh'}
+              </button>
+            )}
+          </div>
+        </header>
 
-      {pullProgressImage && (
-        <PullProgress
-          imageName={pullProgressImage}
-          onClose={deployImage ? handleDeployPullComplete : handlePullProgressClose}
-          onStartPull={() => {
-            dockerApi.pullImage(pullProgressImage).catch(err => {
-              setError(err instanceof Error ? err.message : 'Failed to pull image');
-            });
-          }}
-        />
-      )}
+        {error && (
+          <div className="error-banner">
+            {error}
+            <button onClick={() => setError(null)} className="close-btn">×</button>
+          </div>
+        )}
 
-      <main className="app-main">
+        {pullProgressImage && (
+          <PullProgress
+            imageName={pullProgressImage}
+            onClose={deployImage ? handleDeployPullComplete : handlePullProgressClose}
+            onStartPull={() => {
+              dockerApi.pullImage(pullProgressImage).catch(err => {
+                setError(err instanceof Error ? err.message : 'Failed to pull image');
+              });
+            }}
+          />
+        )}
+
+        <main className="app-main">
         {currentView === 'list' && (
           <ContainerList
             containers={containers}
@@ -339,6 +416,14 @@ function App() {
 
         {currentView === 'logs' && selectedContainer && (
           <LogsView containerId={selectedContainer} />
+        )}
+
+        {currentView === 'terminal' && selectedContainer && (
+          <Terminal
+            containerId={selectedContainer}
+            containerName={containerDetails?.name?.replace(/^\//, '') || selectedContainer.substring(0, 12)}
+            onClose={() => setCurrentView('details')}
+          />
         )}
 
         {currentView === 'images' && (
@@ -397,6 +482,7 @@ function App() {
           />
         )}
       </main>
+      </div>
     </div>
   );
 }

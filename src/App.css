@@ -97,45 +97,50 @@ code {
 
 .app {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   height: 100vh;
   overflow: hidden;
   background-color: var(--bg-secondary);
 }
 
-/* Header - Windows 8 style */
-.app-header {
+
+.sidebar {
+  width: 220px;
   background-color: var(--metro-blue);
-  padding: 1.25rem 2rem;
-  border-bottom: none;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  gap: 2rem;
+  flex-direction: column;
+  flex-shrink: 0;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+  z-index: 10;
 }
 
-.app-header h1 {
-  font-size: 1.75rem;
+.sidebar-header {
+  padding: 1.5rem 1rem;
+}
+
+.sidebar-header h1 {
+  font-size: 2rem;
   margin: 0;
   color: var(--text-on-accent);
   font-weight: 300;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
   text-transform: uppercase;
-  flex-shrink: 0;
+  text-align: center;
 }
 
-.main-nav {
+.sidebar .main-nav {
   display: flex;
-  gap: 0;
+  flex-direction: column;
   flex: 1;
+  gap: 2px;
+  padding-top: 1rem;
 }
 
 .nav-btn {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: transparent;
   border: none;
   color: var(--text-on-accent);
-  padding: 0.75rem 2rem;
+  padding: 1rem 1.5rem;
   font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
@@ -143,16 +148,104 @@ code {
   cursor: pointer;
   transition: background-color 0.15s;
   font-family: 'Segoe UI', sans-serif;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .nav-btn:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .nav-btn.active {
-  background-color: rgba(255, 255, 255, 0.3);
-  border-bottom: 3px solid var(--text-on-accent);
+  background-color: rgba(255, 255, 255, 0.2);
+  border-left: 4px solid var(--text-on-accent);
+  padding-left: calc(1.5rem - 4px);
+}
+
+.nav-item-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-item-wrapper .nav-btn {
+  width: 100%;
+}
+
+.nav-badge {
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  background-color: rgba(0, 0, 0, 0.2);
+  color: var(--text-on-accent);
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.sidebar-footer {
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.sidebar-footer .btn-theme-toggle {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background-color: var(--bg-secondary);
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 2rem;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  min-height: 72px;
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 300;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.breadcrumb-link {
+  color: var(--metro-blue);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.breadcrumb-link:hover {
+  color: var(--metro-purple);
+  text-decoration: underline;
+}
+
+.breadcrumb-separator {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.breadcrumb-current {
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 .header-controls {
@@ -168,7 +261,7 @@ code {
   gap: 0.75rem;
   cursor: pointer;
   user-select: none;
-  color: var(--text-on-accent);
+  color: var(--text-primary);
   font-size: 13px;
   font-weight: 400;
 }
@@ -177,7 +270,7 @@ code {
   cursor: pointer;
   width: 20px;
   height: 20px;
-  accent-color: var(--text-on-accent);
+  accent-color: var(--metro-blue);
 }
 
 .app-main {

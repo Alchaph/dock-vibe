@@ -790,6 +790,7 @@ const BUILTIN_TEMPLATES: ContainerTemplate[] = [
 
 function Templates({ onUseTemplate }: TemplatesProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [customTemplates, setCustomTemplates] = useState<ContainerTemplate[]>(() => {
     const saved = localStorage.getItem('customTemplates');
     if (saved) {
@@ -826,7 +827,7 @@ function Templates({ onUseTemplate }: TemplatesProps) {
     { id: 'utilities', name: 'Utilities', filter: ['portainer', 'registry', 'vault', 'adminer', 'elasticsearch'] }
   ];
 
-  const filteredTemplates = selectedCategory === 'all'
+  const categoryFiltered = selectedCategory === 'all'
     ? allTemplates
     : selectedCategory === 'custom'
     ? customTemplates
@@ -834,6 +835,15 @@ function Templates({ onUseTemplate }: TemplatesProps) {
         const category = categories.find(c => c.id === selectedCategory);
         return category && 'filter' in category && category.filter?.includes(t.id);
       });
+
+  const filteredTemplates = searchQuery.trim()
+    ? categoryFiltered.filter(t => {
+        const q = searchQuery.toLowerCase();
+        return t.name.toLowerCase().includes(q)
+          || t.description.toLowerCase().includes(q)
+          || t.image.toLowerCase().includes(q);
+      })
+    : categoryFiltered;
 
   const handleDeleteTemplate = (templateId: string) => {
     if (confirm('Are you sure you want to delete this custom template?')) {
@@ -911,6 +921,24 @@ function Templates({ onUseTemplate }: TemplatesProps) {
       </div>
 
       <div className="templates-categories">
+        <div className="templates-search">
+          <input
+            type="text"
+            placeholder="Search templates..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="templates-search-input"
+          />
+          {searchQuery && (
+            <button
+              className="templates-search-clear"
+              onClick={() => setSearchQuery('')}
+              title="Clear search"
+            >
+              &times;
+            </button>
+          )}
+        </div>
         {categories.map(category => (
           <button
             key={category.id}
@@ -988,7 +1016,11 @@ function Templates({ onUseTemplate }: TemplatesProps) {
 
       {filteredTemplates.length === 0 && (
         <div className="templates-empty">
-          <p>No templates found in this category</p>
+          {searchQuery.trim() ? (
+            <p>No templates matching "{searchQuery}"</p>
+          ) : (
+            <p>No templates found in this category</p>
+          )}
         </div>
       )}
     </div>

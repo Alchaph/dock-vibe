@@ -5,6 +5,7 @@ mod validation;
 
 use bollard::Docker;
 use bollard::container::{ListContainersOptions, RemoveContainerOptions, LogsOptions, StartContainerOptions, StatsOptions, CreateContainerOptions, Config};
+use bollard::exec::{CreateExecOptions, StartExecResults, ResizeExecOptions};
 use bollard::image::{ListImagesOptions, RemoveImageOptions};
 use bollard::network::{CreateNetworkOptions};
 use bollard::volume::{CreateVolumeOptions, RemoveVolumeOptions};
@@ -15,7 +16,9 @@ use reqwest;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tauri::{State, AppHandle, Emitter};
+use tauri::ipc::Channel;
 use std::collections::HashMap;
+use tokio::io::AsyncWriteExt;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct ContainerInfo {
@@ -116,6 +119,15 @@ struct CreateContainerRequest {
 
 struct DockerState {
     docker: Arc<Mutex<Docker>>,
+}
+
+struct TerminalSession {
+    stdin_tx: tokio::sync::mpsc::UnboundedSender<Vec<u8>>,
+    exec_id: String,
+}
+
+struct TerminalState {
+    sessions: Arc<Mutex<HashMap<String, TerminalSession>>>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -1084,6 +1096,147 @@ async fn search_docker_hub(query: String, limit: Option<usize>) -> Result<Vec<Re
     Ok(results)
 }
 
+// Terminal / Exec commands
+#[derive(Clone, Serialize)]
+struct TerminalOutputEvent {
+    data: String,
+}
+
+#[tauri::command]
+async fn start_terminal(
+    container_id: String,
+    on_output: Channel<TerminalOutputEvent>,
+    docker_state: State<'_, DockerState>,
+    terminal_state: State<'_, TerminalState>,
+) -> Result<String, String> {
+    let docker = {
+        let guard = docker_state.docker.lock().await;
+        guard.clone()
+    };
+
+    let exec = docker.create_exec(
+        &container_id,
+        CreateExecOptions {
+            attach_stdout: Some(true),
+            attach_stderr: Some(true),
+            attach_stdin: Some(true),
+            tty: Some(true),
+            cmd: Some(vec![
+                "/bin/sh".to_string(),
+                "-c".to_string(),
+                "if command -v bash > /dev/null 2>&1; then exec bash; else exec sh; fi".to_string(),
+            ]),
+            ..Default::default()
+        },
+    ).await.map_err(|e| format!("Failed to create exec: {}", e))?;
+
+    let exec_id = exec.id.clone();
+
+    match docker.start_exec(&exec_id, None).await {
+        Ok(StartExecResults::Attached { mut output, mut input }) => {
+            let (stdin_tx, mut stdin_rx) = tokio::sync::mpsc::unbounded_channel::<Vec<u8>>();
+
+            {
+                let mut sessions = terminal_state.sessions.lock().await;
+                sessions.insert(container_id.clone(), TerminalSession {
+                    stdin_tx,
+                    exec_id: exec_id.clone(),
+                });
+            }
+
+            // Spawn stdout reader -> frontend channel
+            let container_id_clone = container_id.clone();
+            let sessions_ref = terminal_state.sessions.clone();
+            tokio::spawn(async move {
+                use futures_util::StreamExt;
+                while let Some(Ok(log)) = output.next().await {
+                    let bytes = match log {
+                        bollard::container::LogOutput::StdOut { message } => message,
+                        bollard::container::LogOutput::StdErr { message } => message,
+                        _ => continue,
+                    };
+                    let text = String::from_utf8_lossy(&bytes).to_string();
+                    if on_output.send(TerminalOutputEvent { data: text }).is_err() {
+                        break;
+                    }
+                }
+                // Stream ended — clean up session
+                let mut sessions: tokio::sync::MutexGuard<'_, HashMap<String, TerminalSession>> = sessions_ref.lock().await;
+                sessions.remove(&container_id_clone);
+            });
+
+            // Spawn stdin writer: channel -> docker exec input
+            tokio::spawn(async move {
+                while let Some(data) = stdin_rx.recv().await {
+                    if input.write_all(&data).await.is_err() {
+                        break;
+                    }
+                }
+            });
+
+            Ok(exec_id)
+        }
+        Ok(StartExecResults::Detached) => {
+            Err("Exec started in detached mode unexpectedly".to_string())
+        }
+        Err(e) => Err(format!("Failed to start exec: {}", e)),
+    }
+}
+
+#[tauri::command]
+async fn write_terminal(
+    container_id: String,
+    data: String,
+    terminal_state: State<'_, TerminalState>,
+) -> Result<(), String> {
+    let sessions = terminal_state.sessions.lock().await;
+    if let Some(session) = sessions.get(&container_id) {
+        session.stdin_tx.send(data.into_bytes())
+            .map_err(|e| format!("Failed to write to terminal: {}", e))?;
+        Ok(())
+    } else {
+        Err("No active terminal session for this container".to_string())
+    }
+}
+
+#[tauri::command]
+async fn resize_terminal(
+    container_id: String,
+    cols: u16,
+    rows: u16,
+    docker_state: State<'_, DockerState>,
+    terminal_state: State<'_, TerminalState>,
+) -> Result<(), String> {
+    let exec_id = {
+        let sessions = terminal_state.sessions.lock().await;
+        sessions.get(&container_id)
+            .map(|s| s.exec_id.clone())
+            .ok_or_else(|| "No active terminal session for this container".to_string())?
+    };
+
+    let docker = {
+        let guard = docker_state.docker.lock().await;
+        guard.clone()
+    };
+
+    docker.resize_exec(&exec_id, ResizeExecOptions {
+        width: cols,
+        height: rows,
+    }).await.map_err(|e| format!("Failed to resize terminal: {}", e))?;
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn close_terminal(
+    container_id: String,
+    terminal_state: State<'_, TerminalState>,
+) -> Result<(), String> {
+    let mut sessions = terminal_state.sessions.lock().await;
+    sessions.remove(&container_id);
+    Ok(())
+}
+
 fn main() {
     // Initialize Docker connection
     let docker = Docker::connect_with_local_defaults()
@@ -1093,6 +1246,9 @@ fn main() {
         .plugin(tauri_plugin_shell::init())
         .manage(DockerState {
             docker: Arc::new(Mutex::new(docker)),
+        })
+        .manage(TerminalState {
+            sessions: Arc::new(Mutex::new(HashMap::new())),
         })
         .invoke_handler(tauri::generate_handler![
             list_containers,
@@ -1120,6 +1276,10 @@ fn main() {
             deploy_compose,
             check_image_exists,
             search_docker_hub,
+            start_terminal,
+            write_terminal,
+            resize_terminal,
+            close_terminal,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

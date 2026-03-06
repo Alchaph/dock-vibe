@@ -108,3 +108,7 @@ export interface PullProgressEvent {
   complete: boolean;
   error: string | null;
 }
+
+export interface TerminalOutputEvent {
+  data: string;
+}

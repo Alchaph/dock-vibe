@@ -1,5 +1,5 @@
-import { invoke } from '@tauri-apps/api/core';
-import type { ContainerInfo, ContainerDetails, ImageInfo, ContainerStats, VolumeInfo, NetworkDetails, CreateContainerRequest, ComposeDeployResult, RegistrySearchResult } from './types';
+import { invoke, Channel } from '@tauri-apps/api/core';
+import type { ContainerInfo, ContainerDetails, ImageInfo, ContainerStats, VolumeInfo, NetworkDetails, CreateContainerRequest, ComposeDeployResult, RegistrySearchResult, TerminalOutputEvent } from './types';
 
 export const dockerApi = {
   async checkConnection(): Promise<boolean> {
@@ -107,5 +107,23 @@ export const dockerApi = {
   // Docker registry search
   async searchDockerHub(query: string, limit?: number): Promise<RegistrySearchResult[]> {
     return invoke<RegistrySearchResult[]>('search_docker_hub', { query, limit });
+  },
+
+  async startTerminal(containerId: string, onOutput: (event: TerminalOutputEvent) => void): Promise<string> {
+    const channel = new Channel<TerminalOutputEvent>();
+    channel.onmessage = onOutput;
+    return invoke<string>('start_terminal', { containerId, onOutput: channel });
+  },
+
+  async writeTerminal(containerId: string, data: string): Promise<void> {
+    return invoke('write_terminal', { containerId, data });
+  },
+
+  async resizeTerminal(containerId: string, cols: number, rows: number): Promise<void> {
+    return invoke('resize_terminal', { containerId, cols, rows });
+  },
+
+  async closeTerminal(containerId: string): Promise<void> {
+    return invoke('close_terminal', { containerId });
   },
 };

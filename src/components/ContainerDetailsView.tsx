@@ -66,6 +66,13 @@ const ContainerDetailsView = ({ details, onAction }: ContainerDetailsViewProps) 
             Restart
           </button>
           <button
+            onClick={() => onAction('terminal', details.id)}
+            className="btn btn-secondary"
+            disabled={details.state.toLowerCase() !== 'running'}
+          >
+            Terminal
+          </button>
+          <button
             onClick={() => onAction('remove', details.id)}
             className="btn btn-danger"
           >
