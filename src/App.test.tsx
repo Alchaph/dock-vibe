@@ -87,11 +87,13 @@ describe('App', () => {
       render(<App />);
 
       await waitFor(() => {
-        expect(screen.getByText('Templates')).toBeInTheDocument();
-        expect(screen.getByText('Containers')).toBeInTheDocument();
-        expect(screen.getByText('Images')).toBeInTheDocument();
-        expect(screen.getByText('Volumes')).toBeInTheDocument();
-        expect(screen.getByText('Networks')).toBeInTheDocument();
+        const navButtons = screen.getAllByRole('button').filter(btn => btn.classList.contains('nav-btn'));
+        const navTexts = navButtons.map(btn => btn.textContent);
+        expect(navTexts).toContain('Templates');
+        expect(navTexts).toContain('Containers');
+        expect(navTexts).toContain('Images');
+        expect(navTexts).toContain('Volumes');
+        expect(navTexts).toContain('Networks');
       });
     });
 
@@ -100,7 +102,8 @@ describe('App', () => {
       render(<App />);
 
       await waitFor(() => {
-        const templatesBtn = screen.getByText('Templates');
+        const navButtons = screen.getAllByRole('button').filter(btn => btn.classList.contains('nav-btn'));
+        const templatesBtn = navButtons.find(btn => btn.textContent === 'Templates');
         expect(templatesBtn).toHaveClass('active');
       });
     });
@@ -109,11 +112,17 @@ describe('App', () => {
       setupConnectedApp();
       render(<App />);
 
-      await waitFor(() => screen.getByText('Containers'));
-      await userEvent.click(screen.getByText('Containers'));
+      await waitFor(() => {
+        const navButtons = screen.getAllByRole('button').filter(btn => btn.classList.contains('nav-btn'));
+        return navButtons.find(btn => btn.textContent === 'Containers');
+      });
+      const containersBtn = screen.getAllByRole('button').filter(btn => btn.classList.contains('nav-btn')).find(btn => btn.textContent === 'Containers')!;
+      await userEvent.click(containersBtn);
 
       await waitFor(() => {
-        expect(screen.getByText('Containers')).toHaveClass('active');
+        const navButtons = screen.getAllByRole('button').filter(btn => btn.classList.contains('nav-btn'));
+        const btn = navButtons.find(b => b.textContent === 'Containers');
+        expect(btn).toHaveClass('active');
       });
     });
   });

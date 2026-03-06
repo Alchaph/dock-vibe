@@ -75,11 +75,11 @@ describe('LogsView', () => {
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith(sampleLogs);
     });
 
-    it('has open raw button', async () => {
+    it('has export button', async () => {
       render(<LogsView containerId="abc123" />);
 
       await waitFor(() => screen.getByText(/Server starting/));
-      expect(screen.getByText('Open Raw')).toBeInTheDocument();
+      expect(screen.getByText('Export')).toBeInTheDocument();
     });
 
     it('has refresh button', async () => {
