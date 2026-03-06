@@ -61,7 +61,7 @@ jobs:
               repo: context.repo.repo,
               tag_name: `v${process.env.PACKAGE_VERSION}`,
               name: `Dock v${process.env.PACKAGE_VERSION}`,
-              body: '## Latest Release - Easy Download\n\n### Quick Download\nChoose your platform below and download the appropriate file from the **Assets** section at the bottom of this page.\n\n### Available Downloads\n- **macOS Apple Silicon (M1/M2/M3)**: Download `.dmg` or `.app.tar.gz` file with `aarch64` in the name\n- **macOS Intel**: Download `.dmg` or `.app.tar.gz` file with `x86_64` in the name\n- **Linux**: Download `.deb` or `.AppImage`\n- **Windows**: Download `.msi` or `.exe`\n\n## What\'s Changed\n\nSee [IMPLEMENTATION.md](https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/blob/main/IMPLEMENTATION.md) for full changelog.\n\n### Features\n- Complete Docker container management\n- Real-time resource monitoring\n- 76 pre-configured templates\n- Docker Compose support\n- Docker Registry search\n- Auto-pull images\n- Volume & network management\n- Production-ready security\n- Input validation & sanitization',
+              body: '## Latest Release - Easy Download\n\n### Quick Download\nChoose your platform below and download the appropriate file from the **Assets** section at the bottom of this page.\n\n### Available Downloads\n- **macOS Apple Silicon (M1/M2/M3)**: Download `.dmg` or `.app.tar.gz` file with `aarch64` in the name\n- **macOS Intel**: Download `.dmg` or `.app.tar.gz` file with `x86_64` in the name\n- **Linux**: Download `.deb` or `.AppImage`\n- **Windows**: Download `.msi` or `.exe`\n\n## What\'s Changed\n\n### Features\n- Complete Docker & Podman container management\n- Real-time resource monitoring\n- 76 pre-configured templates\n- Docker Compose support\n- Docker Registry search\n- Auto-pull images\n- Volume & network management\n- Open in browser for exposed ports\n- Production-ready security\n- Input validation & sanitization',
               draft: false,
               prerelease: false,
               make_latest: 'true'
@@ -115,10 +115,33 @@ jobs:
       - name: Install frontend dependencies
         run: npm install
 
+      - name: Import Apple signing certificate
+        if: matrix.platform == 'macos-latest' && env.APPLE_CERTIFICATE != ''
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_KEYCHAIN_PASSWORD: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+        run: |
+          echo $APPLE_CERTIFICATE | base64 --decode > certificate.p12
+          security create-keychain -p "$APPLE_KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$APPLE_KEYCHAIN_PASSWORD" build.keychain
+          security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$APPLE_KEYCHAIN_PASSWORD" build.keychain
+          rm certificate.p12
+
       - name: Build the app
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           releaseId: ${{ needs.create-release.outputs.release_id }}
           args: ${{ matrix.args }}
