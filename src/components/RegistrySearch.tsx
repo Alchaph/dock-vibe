@@ -6,9 +6,10 @@ import './RegistrySearch.css';
 interface RegistrySearchProps {
   onClose: () => void;
   onPullImage: (imageName: string) => void;
+  onDeploy?: (imageName: string) => void;
 }
 
-const RegistrySearch: React.FC<RegistrySearchProps> = ({ onClose, onPullImage }) => {
+const RegistrySearch: React.FC<RegistrySearchProps> = ({ onClose, onPullImage, onDeploy }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<RegistrySearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -40,6 +41,12 @@ const RegistrySearch: React.FC<RegistrySearchProps> = ({ onClose, onPullImage })
 
   const handlePull = (imageName: string) => {
     onPullImage(imageName);
+  };
+
+  const handleDeploy = (imageName: string) => {
+    if (onDeploy) {
+      onDeploy(imageName);
+    }
   };
 
   return (
@@ -116,6 +123,14 @@ const RegistrySearch: React.FC<RegistrySearchProps> = ({ onClose, onPullImage })
                       >
                         Pull Image
                       </button>
+                      {onDeploy && (
+                        <button
+                          className="btn-deploy"
+                          onClick={() => handleDeploy(result.name)}
+                        >
+                          Deploy
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}

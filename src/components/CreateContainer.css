@@ -91,6 +91,40 @@
   font-style: italic;
 }
 
+.image-input-toggle {
+  display: flex;
+  gap: 0;
+  margin-bottom: 0.5rem;
+}
+
+.image-input-toggle .toggle-btn {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.image-input-toggle .toggle-btn:first-child {
+  border-right: 1px solid var(--border-color);
+}
+
+.image-input-toggle .toggle-btn:last-child {
+  border-left: 1px solid var(--border-color);
+}
+
+.image-input-toggle .toggle-btn.active {
+  background: var(--metro-blue);
+  border-color: var(--metro-blue);
+  color: var(--text-on-accent);
+}
+
 /* Port mappings */
 .port-row {
   display: flex;

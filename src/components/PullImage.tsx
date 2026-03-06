@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { dockerApi } from '../api';
+import PullProgress from './PullProgress';
 import './PullImage.css';
 
 interface PullImageProps {
@@ -10,6 +11,7 @@ interface PullImageProps {
 function PullImage({ onClose, onSuccess }: PullImageProps) {
   const [imageName, setImageName] = useState('');
   const [pulling, setPulling] = useState(false);
+  const [pullTarget, setPullTarget] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handlePull = async (e: React.FormEvent) => {
@@ -21,17 +23,37 @@ function PullImage({ onClose, onSuccess }: PullImageProps) {
 
     setPulling(true);
     setError(null);
+    const target = imageName.trim();
+    setPullTarget(target);
+  };
 
+  const handleStartPull = async () => {
+    if (!pullTarget) return;
     try {
-      await dockerApi.pullImage(imageName.trim());
-      onSuccess();
-      onClose();
+      await dockerApi.pullImage(pullTarget);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to pull image');
-    } finally {
+      setPullTarget(null);
       setPulling(false);
     }
   };
+
+  const handlePullProgressClose = () => {
+    setPullTarget(null);
+    setPulling(false);
+    onSuccess();
+    onClose();
+  };
+
+  if (pullTarget) {
+    return (
+      <PullProgress
+        imageName={pullTarget}
+        onClose={handlePullProgressClose}
+        onStartPull={handleStartPull}
+      />
+    );
+  }
 
   return (
     <div className="modal-overlay">

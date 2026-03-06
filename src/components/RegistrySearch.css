@@ -258,6 +258,7 @@
 .result-actions {
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
 }
 
 .btn-pull {
@@ -272,5 +273,20 @@
 }
 
 .btn-pull:hover {
+  opacity: 0.9;
+}
+
+.btn-deploy {
+  background: var(--metro-blue);
+  color: var(--text-on-accent);
+  border: none;
+  padding: 8px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-deploy:hover {
   opacity: 0.9;
 }

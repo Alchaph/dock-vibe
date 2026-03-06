@@ -255,4 +255,86 @@ describe('CreateContainer', () => {
       });
     });
   });
+
+  describe('custom image mode', () => {
+    it('shows Local Images and Custom Image toggle buttons', async () => {
+      render(<CreateContainer onClose={onClose} onCreated={onCreated} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Local Images')).toBeInTheDocument();
+        expect(screen.getByText('Custom Image')).toBeInTheDocument();
+      });
+    });
+
+    it('switches to custom image input when Custom Image is clicked', async () => {
+      render(<CreateContainer onClose={onClose} onCreated={onCreated} />);
+
+      await waitFor(() => screen.getByText('Custom Image'));
+      const customImageBtn = screen.getByText('Custom Image');
+      await userEvent.click(customImageBtn);
+
+      await waitFor(() => {
+        const input = screen.getByPlaceholderText('e.g., linuxserver/heimdall:latest');
+        expect(input).toBeInTheDocument();
+      });
+    });
+
+    it('allows typing a custom image name', async () => {
+      render(<CreateContainer onClose={onClose} onCreated={onCreated} />);
+
+      await waitFor(() => screen.getByText('Custom Image'));
+      const customImageBtn = screen.getByText('Custom Image');
+      await userEvent.click(customImageBtn);
+
+      const input = screen.getByPlaceholderText('e.g., linuxserver/heimdall:latest') as HTMLInputElement;
+      await userEvent.type(input, 'myimage:v1');
+
+      expect(input.value).toBe('myimage:v1');
+    });
+
+    it('submits with custom image name', async () => {
+      render(<CreateContainer onClose={onClose} onCreated={onCreated} />);
+
+      await waitFor(() => screen.getByText('Custom Image'));
+      const customImageBtn = screen.getByText('Custom Image');
+      await userEvent.click(customImageBtn);
+
+      const input = screen.getByPlaceholderText('e.g., linuxserver/heimdall:latest');
+      await userEvent.type(input, 'myimage:v1');
+
+      await userEvent.click(screen.getByRole('button', { name: 'Create Container' }));
+
+      await waitFor(() => {
+        expect(mockInvoke).toHaveBeenCalledWith('create_container', expect.objectContaining({
+          request: expect.objectContaining({ image: 'myimage:v1' }),
+        }));
+      });
+    });
+
+    it('auto-switches to custom mode when template image is not in local images', async () => {
+      const templateWithMissingImage: ContainerTemplate = {
+        id: 'heimdall',
+        name: 'Heimdall',
+        description: 'Heimdall dashboard',
+        color: '#333333',
+        image: 'linuxserver/heimdall:latest',
+        ports: [],
+        volumes: [],
+        envVars: [],
+        network: 'bridge',
+        restartPolicy: 'no',
+        command: '',
+        memoryLimit: '',
+        cpuLimit: '',
+      };
+
+      render(<CreateContainer onClose={onClose} onCreated={onCreated} template={templateWithMissingImage} />);
+
+      await waitFor(() => {
+        const input = screen.getByPlaceholderText('e.g., linuxserver/heimdall:latest') as HTMLInputElement;
+        expect(input).toBeInTheDocument();
+        expect(input.value).toBe('linuxserver/heimdall:latest');
+      });
+    });
+  });
 });

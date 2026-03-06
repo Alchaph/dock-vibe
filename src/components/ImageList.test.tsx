@@ -146,4 +146,22 @@ describe('ImageList', () => {
       });
     });
   });
+
+  describe('deploy functionality', () => {
+    it('passes onDeploy to RegistrySearch when provided', async () => {
+      const onDeploy = vi.fn();
+      render(<ImageList onPullImage={onPullImage} onDeploy={onDeploy} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Search Registry')).toBeInTheDocument();
+      });
+
+      const searchRegistryBtn = screen.getByText('Search Registry');
+      await userEvent.click(searchRegistryBtn);
+
+      await waitFor(() => {
+        expect(screen.getByText('Search Docker Hub')).toBeInTheDocument();
+      });
+    });
+  });
 });

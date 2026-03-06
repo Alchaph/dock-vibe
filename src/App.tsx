@@ -6,6 +6,7 @@ import ContainerDetailsView from './components/ContainerDetailsView';
 import LogsView from './components/LogsView';
 import ImageList from './components/ImageList';
 import PullImage from './components/PullImage';
+import PullProgress from './components/PullProgress';
 import VolumeList from './components/VolumeList';
 import NetworkList from './components/NetworkList';
 import CreateContainer from './components/CreateContainer';
@@ -32,8 +33,8 @@ function App() {
   const [showCreateContainer, setShowCreateContainer] = useState(false);
   const [showComposeUpload, setShowComposeUpload] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ContainerTemplate | null>(null);
-  const [pullingImage, setPullingImage] = useState(false);
-  const [pullProgress, setPullProgress] = useState<string>('');
+  const [pullProgressImage, setPullProgressImage] = useState<string | null>(null);
+  const [deployImage, setDeployImage] = useState<string | null>(null);
 
   // Apply dark mode class to body
   useEffect(() => {
@@ -146,38 +147,53 @@ function App() {
   const handleUseTemplate = async (template: ContainerTemplate) => {
     setSelectedTemplate(template);
     
-    // Check if image exists
     try {
       const imageExists = await dockerApi.checkImageExists(template.image);
       
       if (!imageExists) {
-        // Auto-pull the image
-        setPullingImage(true);
-        setPullProgress(`Pulling ${template.image}...`);
-        
-        try {
-          await dockerApi.pullImage(template.image);
-          setPullProgress(`Successfully pulled ${template.image}`);
-          
-          // Wait a moment to show success message
-          setTimeout(() => {
-            setPullingImage(false);
-            setPullProgress('');
-            setShowCreateContainer(true);
-          }, 1000);
-        } catch (err) {
-          setPullingImage(false);
-          setPullProgress('');
-          setError(err instanceof Error ? err.message : 'Failed to pull image');
-          // Still show create container dialog in case they want to try manually
-          setShowCreateContainer(true);
-        }
+        setPullProgressImage(template.image);
       } else {
-        // Image exists, proceed directly
         setShowCreateContainer(true);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to check image');
+      setShowCreateContainer(true);
+    }
+  };
+
+  const handlePullProgressClose = () => {
+    const image = pullProgressImage;
+    setPullProgressImage(null);
+    if (selectedTemplate && image) {
+      setShowCreateContainer(true);
+    }
+  };
+
+  const handleDeployFromRegistry = (imageName: string) => {
+    setDeployImage(imageName);
+    setPullProgressImage(imageName);
+  };
+
+  const handleDeployPullComplete = () => {
+    const image = deployImage;
+    setPullProgressImage(null);
+    setDeployImage(null);
+    if (image) {
+      setSelectedTemplate({
+        id: 'custom-deploy',
+        name: image.split('/').pop()?.split(':')[0] || image,
+        description: `Deployed from registry: ${image}`,
+        color: '#0078D7',
+        image: image,
+        ports: [],
+        volumes: [],
+        envVars: [],
+        network: 'bridge',
+        restartPolicy: 'unless-stopped',
+        command: '',
+        memoryLimit: '',
+        cpuLimit: ''
+      });
       setShowCreateContainer(true);
     }
   };
@@ -291,10 +307,16 @@ function App() {
         </div>
       )}
 
-      {pullingImage && (
-        <div className="info-banner">
-          {pullProgress}
-        </div>
+      {pullProgressImage && (
+        <PullProgress
+          imageName={pullProgressImage}
+          onClose={deployImage ? handleDeployPullComplete : handlePullProgressClose}
+          onStartPull={() => {
+            dockerApi.pullImage(pullProgressImage).catch(err => {
+              setError(err instanceof Error ? err.message : 'Failed to pull image');
+            });
+          }}
+        />
       )}
 
       <main className="app-main">
@@ -320,7 +342,10 @@ function App() {
         )}
 
         {currentView === 'images' && (
-          <ImageList onPullImage={() => setShowPullImage(true)} />
+          <ImageList
+            onPullImage={() => setShowPullImage(true)}
+            onDeploy={handleDeployFromRegistry}
+          />
         )}
 
         {currentView === 'volumes' && (

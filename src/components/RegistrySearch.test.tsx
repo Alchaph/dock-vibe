@@ -170,4 +170,46 @@ describe('RegistrySearch', () => {
     await userEvent.click(screen.getByText('×'));
     expect(onClose).toHaveBeenCalled();
   });
+
+  describe('deploy functionality', () => {
+    it('renders Deploy button when onDeploy prop is provided', async () => {
+      const onDeploy = vi.fn();
+      render(<RegistrySearch onClose={onClose} onPullImage={onPullImage} onDeploy={onDeploy} />);
+
+      const input = screen.getByPlaceholderText(/Search for images/);
+      await userEvent.type(input, 'nginx');
+      await userEvent.click(screen.getByText('Search'));
+
+      await waitFor(() => {
+        expect(screen.getAllByText('Deploy').length).toBeGreaterThan(0);
+      });
+    });
+
+    it('does NOT render Deploy button when onDeploy prop is not provided', async () => {
+      render(<RegistrySearch onClose={onClose} onPullImage={onPullImage} />);
+
+      const input = screen.getByPlaceholderText(/Search for images/);
+      await userEvent.type(input, 'nginx');
+      await userEvent.click(screen.getByText('Search'));
+
+      await waitFor(() => {
+        expect(screen.queryByText('Deploy')).not.toBeInTheDocument();
+      });
+    });
+
+    it('calls onDeploy with image name when Deploy button is clicked', async () => {
+      const onDeploy = vi.fn();
+      render(<RegistrySearch onClose={onClose} onPullImage={onPullImage} onDeploy={onDeploy} />);
+
+      const input = screen.getByPlaceholderText(/Search for images/);
+      await userEvent.type(input, 'nginx');
+      await userEvent.click(screen.getByText('Search'));
+
+      await waitFor(() => screen.getAllByText('Deploy'));
+      const deployButtons = screen.getAllByText('Deploy');
+      await userEvent.click(deployButtons[0]);
+
+      expect(onDeploy).toHaveBeenCalledWith('nginx');
+    });
+  });
 });

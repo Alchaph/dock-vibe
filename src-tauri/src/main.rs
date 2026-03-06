@@ -14,7 +14,7 @@ use serde_yaml;
 use reqwest;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tauri::State;
+use tauri::{State, AppHandle, Emitter};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -116,6 +116,19 @@ struct CreateContainerRequest {
 
 struct DockerState {
     docker: Arc<Mutex<Docker>>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct PullProgressEvent {
+    image: String,
+    id: Option<String>,
+    status: String,
+    progress: Option<String>,
+    current: Option<u64>,
+    total: Option<u64>,
+    complete: bool,
+    error: Option<String>,
 }
 
 fn convert_container_summary(container: ContainerSummary) -> ContainerInfo {
@@ -371,14 +384,17 @@ async fn remove_image(state: State<'_, DockerState>, id: String, force: bool) ->
 }
 
 #[tauri::command]
-async fn pull_image(state: State<'_, DockerState>, name: String) -> Result<(), String> {
-    let docker = state.docker.lock().await;
+async fn pull_image(app: AppHandle, state: State<'_, DockerState>, name: String) -> Result<(), String> {
+    let docker = {
+        let guard = state.docker.lock().await;
+        guard.clone()
+    };
     
     use futures_util::stream::StreamExt;
     
     let mut stream = docker.create_image(
         Some(bollard::image::CreateImageOptions {
-            from_image: name,
+            from_image: name.clone(),
             ..Default::default()
         }),
         None,
@@ -386,8 +402,53 @@ async fn pull_image(state: State<'_, DockerState>, name: String) -> Result<(), S
     );
     
     while let Some(result) = stream.next().await {
-        result.map_err(|e| format!("Failed to pull image: {}", e))?;
+        match result {
+            Ok(info) => {
+                let (current, total) = match &info.progress_detail {
+                    Some(detail) => (
+                        detail.current.map(|c| c as u64),
+                        detail.total.map(|t| t as u64),
+                    ),
+                    None => (None, None),
+                };
+                
+                let _ = app.emit("pull-progress", PullProgressEvent {
+                    image: name.clone(),
+                    id: info.id.clone(),
+                    status: info.status.unwrap_or_default(),
+                    progress: info.progress.clone(),
+                    current,
+                    total,
+                    complete: false,
+                    error: None,
+                });
+            }
+            Err(e) => {
+                let _ = app.emit("pull-progress", PullProgressEvent {
+                    image: name.clone(),
+                    id: None,
+                    status: "error".to_string(),
+                    progress: None,
+                    current: None,
+                    total: None,
+                    complete: true,
+                    error: Some(format!("{}", e)),
+                });
+                return Err(format!("Failed to pull image: {}", e));
+            }
+        }
     }
+    
+    let _ = app.emit("pull-progress", PullProgressEvent {
+        image: name.clone(),
+        id: None,
+        status: "Pull complete".to_string(),
+        progress: None,
+        current: None,
+        total: None,
+        complete: true,
+        error: None,
+    });
     
     Ok(())
 }

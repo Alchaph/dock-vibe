@@ -97,3 +97,14 @@ export interface RegistrySearchResult {
   is_official: boolean;
   is_automated: boolean;
 }
+
+export interface PullProgressEvent {
+  image: string;
+  id: string | null;
+  status: string;
+  progress: string | null;
+  current: number | null;
+  total: number | null;
+  complete: boolean;
+  error: string | null;
+}

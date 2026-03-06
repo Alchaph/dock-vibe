@@ -29,6 +29,8 @@ interface Volume {
 function CreateContainer({ onClose, onCreated, template }: CreateContainerProps) {
   const [images, setImages] = useState<ImageInfo[]>([]);
   const [selectedImage, setSelectedImage] = useState(template?.image || '');
+  const [customImageName, setCustomImageName] = useState('');
+  const [useCustomImage, setUseCustomImage] = useState(false);
   const [containerName, setContainerName] = useState('');
   const [ports, setPorts] = useState<PortMapping[]>(template?.ports || []);
   const [volumes, setVolumes] = useState<Volume[]>(template?.volumes || []);
@@ -45,7 +47,13 @@ function CreateContainer({ onClose, onCreated, template }: CreateContainerProps)
     try {
       const imageList = await dockerApi.listImages();
       setImages(imageList);
-      if (!template && imageList.length > 0 && imageList[0].repo_tags.length > 0) {
+      if (template) {
+        const allTags = imageList.flatMap(img => img.repo_tags);
+        if (!allTags.includes(template.image)) {
+          setUseCustomImage(true);
+          setCustomImageName(template.image);
+        }
+      } else if (imageList.length > 0 && imageList[0].repo_tags.length > 0) {
         setSelectedImage(imageList[0].repo_tags[0]);
       }
     } catch (err) {
@@ -106,8 +114,10 @@ function CreateContainer({ onClose, onCreated, template }: CreateContainerProps)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedImage) {
-      setError('Please select an image');
+    const image = useCustomImage ? customImageName.trim() : selectedImage;
+    
+    if (!image) {
+      setError('Please select or enter an image');
       return;
     }
 
@@ -144,7 +154,7 @@ function CreateContainer({ onClose, onCreated, template }: CreateContainerProps)
       const cpuQuota = cpuLimit ? parseFloat(cpuLimit) * 100000 : undefined;
 
       const request: CreateContainerRequest = {
-        image: selectedImage,
+        image,
         name: containerName.trim() || undefined,
         ports: Object.keys(portMappings).length > 0 ? portMappings : undefined,
         volumes: volumeSpecs.length > 0 ? volumeSpecs : undefined,
@@ -190,19 +200,46 @@ function CreateContainer({ onClose, onCreated, template }: CreateContainerProps)
             
             <div className="form-group">
               <label htmlFor="image">Image *</label>
-              <select
-                id="image"
-                value={selectedImage}
-                onChange={(e) => setSelectedImage(e.target.value)}
-                required
-              >
-                <option value="">Select an image...</option>
-                {images.map(img => 
-                  img.repo_tags.map(tag => (
-                    <option key={tag} value={tag}>{tag}</option>
-                  ))
-                )}
-              </select>
+              <div className="image-input-toggle">
+                <button
+                  type="button"
+                  className={`toggle-btn ${!useCustomImage ? 'active' : ''}`}
+                  onClick={() => setUseCustomImage(false)}
+                >
+                  Local Images
+                </button>
+                <button
+                  type="button"
+                  className={`toggle-btn ${useCustomImage ? 'active' : ''}`}
+                  onClick={() => setUseCustomImage(true)}
+                >
+                  Custom Image
+                </button>
+              </div>
+              {useCustomImage ? (
+                <input
+                  id="image"
+                  type="text"
+                  value={customImageName}
+                  onChange={(e) => setCustomImageName(e.target.value)}
+                  placeholder="e.g., linuxserver/heimdall:latest"
+                  required
+                />
+              ) : (
+                <select
+                  id="image"
+                  value={selectedImage}
+                  onChange={(e) => setSelectedImage(e.target.value)}
+                  required
+                >
+                  <option value="">Select an image...</option>
+                  {images.map(img => 
+                    img.repo_tags.map(tag => (
+                      <option key={tag} value={tag}>{tag}</option>
+                    ))
+                  )}
+                </select>
+              )}
             </div>
 
             <div className="form-group">
@@ -381,7 +418,7 @@ function CreateContainer({ onClose, onCreated, template }: CreateContainerProps)
             <button
               type="submit"
               className="btn btn-primary"
-              disabled={creating || !selectedImage}
+              disabled={creating || (useCustomImage ? !customImageName.trim() : !selectedImage)}
             >
               {creating ? 'Creating...' : 'Create Container'}
             </button>

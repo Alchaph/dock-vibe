@@ -2,13 +2,15 @@ import { useState, useEffect, useMemo } from 'react';
 import { dockerApi } from '../api';
 import type { ImageInfo } from '../types';
 import RegistrySearch from './RegistrySearch';
+import PullProgress from './PullProgress';
 import './ImageList.css';
 
 interface ImageListProps {
   onPullImage: () => void;
+  onDeploy?: (imageName: string) => void;
 }
 
-function ImageList({ onPullImage }: ImageListProps) {
+function ImageList({ onPullImage, onDeploy }: ImageListProps) {
   const [images, setImages] = useState<ImageInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,14 +77,26 @@ function ImageList({ onPullImage }: ImageListProps) {
     setShowRegistrySearch(false);
     setPullingImage(imageName);
     setError(null);
-    
+  };
+
+  const handleStartPull = async () => {
+    if (!pullingImage) return;
     try {
-      await dockerApi.pullImage(imageName);
+      await dockerApi.pullImage(pullingImage);
       await loadImages();
-      setPullingImage(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to pull image');
-      setPullingImage(null);
+    }
+  };
+
+  const handlePullProgressClose = () => {
+    setPullingImage(null);
+  };
+
+  const handleDeployFromRegistry = (imageName: string) => {
+    setShowRegistrySearch(false);
+    if (onDeploy) {
+      onDeploy(imageName);
     }
   };
 
@@ -121,9 +135,11 @@ function ImageList({ onPullImage }: ImageListProps) {
       )}
 
       {pullingImage && (
-        <div className="info-message">
-          Pulling image: {pullingImage}...
-        </div>
+        <PullProgress
+          imageName={pullingImage}
+          onClose={handlePullProgressClose}
+          onStartPull={handleStartPull}
+        />
       )}
 
       {/* Search bar */}
@@ -195,6 +211,7 @@ function ImageList({ onPullImage }: ImageListProps) {
         <RegistrySearch
           onClose={() => setShowRegistrySearch(false)}
           onPullImage={handlePullFromRegistry}
+          onDeploy={handleDeployFromRegistry}
         />
       )}
     </div>
