@@ -27,7 +27,7 @@ jobs:
         run: npm run lint
 
       - name: Type check
-        run: npx tsc --noEmit
+        run: npx tsc -b
 
       - name: Run tests
         run: npm test
@@ -116,7 +116,7 @@ jobs:
         run: npm install
 
       - name: Build the app
-        uses: tauri-apps/tauri-action@v0.5.14
+        uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
