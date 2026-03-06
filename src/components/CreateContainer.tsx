@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { dockerApi } from '../api';
 import type { ImageInfo, CreateContainerRequest } from '../types';
 import type { ContainerTemplate } from './Templates';
@@ -41,22 +41,21 @@ function CreateContainer({ onClose, onCreated, template }: CreateContainerProps)
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadImages();
-  }, []);
-
-  const loadImages = async () => {
+  const loadImages = useCallback(async () => {
     try {
       const imageList = await dockerApi.listImages();
       setImages(imageList);
-      // Only set default image if no template was provided
       if (!template && imageList.length > 0 && imageList[0].repo_tags.length > 0) {
         setSelectedImage(imageList[0].repo_tags[0]);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load images');
     }
-  };
+  }, [template]);
+
+  useEffect(() => {
+    loadImages();
+  }, [loadImages]);
 
   const addPort = () => {
     setPorts([...ports, { containerPort: '', hostPort: '' }]);
@@ -76,9 +75,13 @@ function CreateContainer({ onClose, onCreated, template }: CreateContainerProps)
     setVolumes([...volumes, { source: '', target: '', readonly: false }]);
   };
 
-  const updateVolume = (index: number, field: 'source' | 'target' | 'readonly', value: string | boolean) => {
+  const updateVolume = (index: number, field: keyof Volume, value: string | boolean) => {
     const updated = [...volumes];
-    (updated[index][field] as any) = value;
+    if (field === 'readonly') {
+      updated[index] = { ...updated[index], readonly: value as boolean };
+    } else {
+      updated[index] = { ...updated[index], [field]: value as string };
+    }
     setVolumes(updated);
   };
 

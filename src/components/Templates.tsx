@@ -790,20 +790,17 @@ const BUILTIN_TEMPLATES: ContainerTemplate[] = [
 
 function Templates({ onUseTemplate }: TemplatesProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [customTemplates, setCustomTemplates] = useState<ContainerTemplate[]>([]);
-
-  // Load custom templates from localStorage on mount
-  useEffect(() => {
+  const [customTemplates, setCustomTemplates] = useState<ContainerTemplate[]>(() => {
     const saved = localStorage.getItem('customTemplates');
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
-        setCustomTemplates(parsed);
-      } catch (err) {
-        console.error('Failed to load custom templates:', err);
+        return JSON.parse(saved);
+      } catch {
+        console.error('Failed to load custom templates');
       }
     }
-  }, []);
+    return [];
+  });
 
   // Save custom templates to localStorage whenever they change
   useEffect(() => {
@@ -870,7 +867,7 @@ function Templates({ onUseTemplate }: TemplatesProps) {
             // Ensure unique ID
             template.id = `custom-${Date.now()}`;
             setCustomTemplates(prev => [...prev, template]);
-          } catch (err) {
+          } catch {
             alert('Failed to import template: Invalid JSON file');
           }
         };

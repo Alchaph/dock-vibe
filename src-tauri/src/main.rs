@@ -677,9 +677,16 @@ async fn create_container(state: State<'_, DockerState>, request: CreateContaine
     };
     
     // Set restart policy
-    if let Some(_policy) = &request.restart_policy {
+    if let Some(policy) = &request.restart_policy {
+        let policy_name = match policy.as_str() {
+            "always" => bollard::models::RestartPolicyNameEnum::ALWAYS,
+            "unless-stopped" => bollard::models::RestartPolicyNameEnum::UNLESS_STOPPED,
+            "on-failure" => bollard::models::RestartPolicyNameEnum::ON_FAILURE,
+            _ => bollard::models::RestartPolicyNameEnum::NO,
+        };
         host_config.restart_policy = Some(bollard::models::RestartPolicy {
-            name: Some(bollard::models::RestartPolicyNameEnum::UNLESS_STOPPED),
+            name: Some(policy_name),
+            maximum_retry_count: if policy == "on-failure" { Some(5) } else { None },
             ..Default::default()
         });
     }

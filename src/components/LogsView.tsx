@@ -106,7 +106,7 @@ const LogsView = ({ containerId }: LogsViewProps) => {
     try {
       await navigator.clipboard.writeText(filteredLogs || logs);
       alert('Logs copied to clipboard!');
-    } catch (err) {
+    } catch {
       alert('Failed to copy logs');
     }
   };
