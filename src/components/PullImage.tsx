@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { dockerApi } from '../api';
-import PullProgress from './PullProgress';
+import type { PullProgressEvent } from '../types';
 import './PullImage.css';
 
 interface PullImageProps {
@@ -11,8 +11,9 @@ interface PullImageProps {
 function PullImage({ onClose, onSuccess }: PullImageProps) {
   const [imageName, setImageName] = useState('');
   const [pulling, setPulling] = useState(false);
-  const [pullTarget, setPullTarget] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState('');
+  const [complete, setComplete] = useState(false);
 
   const handlePull = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,37 +24,34 @@ function PullImage({ onClose, onSuccess }: PullImageProps) {
 
     setPulling(true);
     setError(null);
-    const target = imageName.trim();
-    setPullTarget(target);
-  };
+    setStatus('Pulling...');
+    setComplete(false);
 
-  const handleStartPull = async () => {
-    if (!pullTarget) return;
     try {
-      await dockerApi.pullImage(pullTarget);
+      await dockerApi.pullImage(imageName.trim(), (event: PullProgressEvent) => {
+        if (event.error) {
+          setError(event.error);
+          setStatus('');
+          return;
+        }
+        if (event.complete) {
+          setComplete(true);
+          setStatus('Pull complete');
+          return;
+        }
+        const layerPrefix = event.id ? `${event.id}: ` : '';
+        setStatus(`${layerPrefix}${event.status}`);
+      });
+
+      setComplete(true);
+      setStatus('Pull complete');
+      onSuccess();
+      onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to pull image');
-      setPullTarget(null);
       setPulling(false);
     }
   };
-
-  const handlePullProgressClose = () => {
-    setPullTarget(null);
-    setPulling(false);
-    onSuccess();
-    onClose();
-  };
-
-  if (pullTarget) {
-    return (
-      <PullProgress
-        imageName={pullTarget}
-        onClose={handlePullProgressClose}
-        onStartPull={handleStartPull}
-      />
-    );
-  }
 
   return (
     <div className="modal-overlay">
@@ -80,6 +78,10 @@ function PullImage({ onClose, onSuccess }: PullImageProps) {
             </p>
           </div>
 
+          {status && !error && (
+            <div className="pull-status">{status.toUpperCase()}</div>
+          )}
+
           {error && (
             <div className="error-message">{error}</div>
           )}
@@ -89,9 +91,8 @@ function PullImage({ onClose, onSuccess }: PullImageProps) {
               type="button"
               onClick={onClose}
               className="btn btn-secondary"
-              disabled={pulling}
             >
-              Cancel
+              {complete ? 'Close' : 'Cancel'}
             </button>
             <button
               type="submit"

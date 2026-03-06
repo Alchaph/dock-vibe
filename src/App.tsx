@@ -6,16 +6,17 @@ import ContainerDetailsView from './components/ContainerDetailsView';
 import LogsView from './components/LogsView';
 import ImageList from './components/ImageList';
 import PullImage from './components/PullImage';
-import PullProgress from './components/PullProgress';
 import VolumeList from './components/VolumeList';
 import NetworkList from './components/NetworkList';
 import CreateContainer from './components/CreateContainer';
 import Templates, { type ContainerTemplate } from './components/Templates';
 import ComposeUpload from './components/ComposeUpload';
 import Terminal from './components/Terminal';
+import SystemPrune from './components/SystemPrune';
+import ResourceDashboard from './components/ResourceDashboard';
 import './App.css';
 
-type View = 'templates' | 'list' | 'details' | 'logs' | 'terminal' | 'images' | 'volumes' | 'networks';
+type View = 'templates' | 'list' | 'details' | 'logs' | 'terminal' | 'images' | 'volumes' | 'networks' | 'dashboard';
 
 function App() {
   const [containers, setContainers] = useState<ContainerInfo[]>([]);
@@ -33,9 +34,10 @@ function App() {
   const [showPullImage, setShowPullImage] = useState(false);
   const [showCreateContainer, setShowCreateContainer] = useState(false);
   const [showComposeUpload, setShowComposeUpload] = useState(false);
+  const [showSystemPrune, setShowSystemPrune] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ContainerTemplate | null>(null);
-  const [pullProgressImage, setPullProgressImage] = useState<string | null>(null);
-  const [deployImage, setDeployImage] = useState<string | null>(null);
+  const [pullingImage, setPullingImage] = useState<string | null>(null);
+  const [pullStatus, setPullStatus] = useState('');
 
   // Apply dark mode class to body
   useEffect(() => {
@@ -176,7 +178,29 @@ function App() {
       const imageExists = await dockerApi.checkImageExists(template.image);
       
       if (!imageExists) {
-        setPullProgressImage(template.image);
+        setPullingImage(template.image);
+        setPullStatus('Pulling...');
+        try {
+          await dockerApi.pullImage(template.image, (event) => {
+            if (event.error) {
+              setError(event.error);
+              return;
+            }
+            if (event.complete) {
+              setPullStatus('Pull complete');
+              return;
+            }
+            const prefix = event.id ? `${event.id}: ` : '';
+            setPullStatus(`${prefix}${event.status}`);
+          });
+          setPullingImage(null);
+          setPullStatus('');
+          setShowCreateContainer(true);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Failed to pull image');
+          setPullingImage(null);
+          setPullStatus('');
+        }
       } else {
         setShowCreateContainer(true);
       }
@@ -186,30 +210,32 @@ function App() {
     }
   };
 
-  const handlePullProgressClose = () => {
-    const image = pullProgressImage;
-    setPullProgressImage(null);
-    if (selectedTemplate && image) {
-      setShowCreateContainer(true);
-    }
-  };
+  const handleDeployFromRegistry = async (imageName: string) => {
+    setPullingImage(imageName);
+    setPullStatus('Pulling...');
+    setError(null);
 
-  const handleDeployFromRegistry = (imageName: string) => {
-    setDeployImage(imageName);
-    setPullProgressImage(imageName);
-  };
-
-  const handleDeployPullComplete = () => {
-    const image = deployImage;
-    setPullProgressImage(null);
-    setDeployImage(null);
-    if (image) {
+    try {
+      await dockerApi.pullImage(imageName, (event) => {
+        if (event.error) {
+          setError(event.error);
+          return;
+        }
+        if (event.complete) {
+          setPullStatus('Pull complete');
+          return;
+        }
+        const prefix = event.id ? `${event.id}: ` : '';
+        setPullStatus(`${prefix}${event.status}`);
+      });
+      setPullingImage(null);
+      setPullStatus('');
       setSelectedTemplate({
         id: 'custom-deploy',
-        name: image.split('/').pop()?.split(':')[0] || image,
-        description: `Deployed from registry: ${image}`,
+        name: imageName.split('/').pop()?.split(':')[0] || imageName,
+        description: `Deployed from registry: ${imageName}`,
         color: '#0078D7',
-        image: image,
+        image: imageName,
         ports: [],
         volumes: [],
         envVars: [],
@@ -220,6 +246,10 @@ function App() {
         cpuLimit: ''
       });
       setShowCreateContainer(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to pull image');
+      setPullingImage(null);
+      setPullStatus('');
     }
   };
 
@@ -304,8 +334,23 @@ function App() {
               Networks
             </button>
           </div>
+          <div className="nav-item-wrapper">
+            <button 
+              onClick={() => setCurrentView('dashboard')}
+              className={`nav-btn ${currentView === 'dashboard' ? 'active' : ''}`}
+            >
+              Dashboard
+            </button>
+          </div>
         </nav>
         <div className="sidebar-footer">
+          <button
+            onClick={() => setShowSystemPrune(true)}
+            className="btn btn-danger btn-sidebar"
+            title="Remove unused containers, images, networks, and optionally volumes"
+          >
+            System Prune
+          </button>
           <button 
             onClick={() => setDarkMode(!darkMode)} 
             className="btn btn-theme-toggle"
@@ -384,16 +429,11 @@ function App() {
           </div>
         )}
 
-        {pullProgressImage && (
-          <PullProgress
-            imageName={pullProgressImage}
-            onClose={deployImage ? handleDeployPullComplete : handlePullProgressClose}
-            onStartPull={() => {
-              dockerApi.pullImage(pullProgressImage).catch(err => {
-                setError(err instanceof Error ? err.message : 'Failed to pull image');
-              });
-            }}
-          />
+        {pullingImage && (
+          <div className="pull-banner">
+            <span className="pull-banner-text">Pulling: {pullingImage}</span>
+            <span className="pull-banner-status">{pullStatus}</span>
+          </div>
         )}
 
         <main className="app-main">
@@ -445,6 +485,10 @@ function App() {
           <Templates onUseTemplate={handleUseTemplate} />
         )}
 
+        {currentView === 'dashboard' && (
+          <ResourceDashboard />
+        )}
+
         {showPullImage && (
           <PullImage
             onClose={() => setShowPullImage(false)}
@@ -477,6 +521,15 @@ function App() {
             onClose={() => setShowComposeUpload(false)}
             onSuccess={() => {
               setShowComposeUpload(false);
+              loadContainers();
+            }}
+          />
+        )}
+
+        {showSystemPrune && (
+          <SystemPrune
+            onClose={() => setShowSystemPrune(false)}
+            onPruned={() => {
               loadContainers();
             }}
           />

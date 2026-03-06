@@ -112,3 +112,24 @@ export interface PullProgressEvent {
 export interface TerminalOutputEvent {
   data: string;
 }
+
+export interface PruneResult {
+  containers_removed: number;
+  images_removed: number;
+  volumes_removed: number;
+  networks_removed: number;
+  space_reclaimed: number;
+}
+
+export interface ContainerStatsEntry {
+  id: string;
+  name: string;
+  image: string;
+  state: string;
+  cpu_usage: number;
+  memory_usage: number;
+  memory_limit: number;
+  memory_percent: number;
+  network_rx: number;
+  network_tx: number;
+}

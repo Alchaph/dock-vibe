@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { dockerApi } from '../api';
 import type { ImageInfo } from '../types';
 import RegistrySearch from './RegistrySearch';
-import PullProgress from './PullProgress';
 import './ImageList.css';
 
 interface ImageListProps {
@@ -17,6 +16,7 @@ function ImageList({ onPullImage, onDeploy }: ImageListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showRegistrySearch, setShowRegistrySearch] = useState(false);
   const [pullingImage, setPullingImage] = useState<string | null>(null);
+  const [pullStatus, setPullStatus] = useState('');
 
   const loadImages = async () => {
     setLoading(true);
@@ -62,7 +62,6 @@ function ImageList({ onPullImage, onDeploy }: ImageListProps) {
     return new Date(timestamp * 1000).toLocaleString();
   };
 
-  // Filter images based on search term
   const filteredImages = useMemo(() => {
     if (!searchTerm.trim()) return images;
     
@@ -76,21 +75,30 @@ function ImageList({ onPullImage, onDeploy }: ImageListProps) {
   const handlePullFromRegistry = async (imageName: string) => {
     setShowRegistrySearch(false);
     setPullingImage(imageName);
+    setPullStatus('Pulling...');
     setError(null);
-  };
 
-  const handleStartPull = async () => {
-    if (!pullingImage) return;
     try {
-      await dockerApi.pullImage(pullingImage);
+      await dockerApi.pullImage(imageName, (event) => {
+        if (event.error) {
+          setError(event.error);
+          return;
+        }
+        if (event.complete) {
+          setPullStatus('Pull complete');
+          return;
+        }
+        const prefix = event.id ? `${event.id}: ` : '';
+        setPullStatus(`${prefix}${event.status}`);
+      });
+      setPullingImage(null);
+      setPullStatus('');
       await loadImages();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to pull image');
+      setPullingImage(null);
+      setPullStatus('');
     }
-  };
-
-  const handlePullProgressClose = () => {
-    setPullingImage(null);
   };
 
   const handleDeployFromRegistry = (imageName: string) => {
@@ -135,14 +143,12 @@ function ImageList({ onPullImage, onDeploy }: ImageListProps) {
       )}
 
       {pullingImage && (
-        <PullProgress
-          imageName={pullingImage}
-          onClose={handlePullProgressClose}
-          onStartPull={handleStartPull}
-        />
+        <div className="pull-banner">
+          <span className="pull-banner-text">PULLING: {pullingImage}</span>
+          <span className="pull-banner-status">{pullStatus.toUpperCase()}</span>
+        </div>
       )}
 
-      {/* Search bar */}
       <div className="search-bar">
         <input
           type="text"

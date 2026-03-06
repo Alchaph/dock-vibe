@@ -4,6 +4,9 @@ import { dockerApi } from './api';
 
 vi.mock('@tauri-apps/api/core', () => ({
   invoke: vi.fn(),
+  Channel: class MockChannel {
+    onmessage: ((msg: unknown) => void) | null = null;
+  },
 }));
 
 const mockInvoke = vi.mocked(invoke);
@@ -166,7 +169,7 @@ describe('dockerApi', () => {
     it('pullImage calls pull_image', async () => {
       mockInvoke.mockResolvedValue(undefined);
       await dockerApi.pullImage('nginx:latest');
-      expect(mockInvoke).toHaveBeenCalledWith('pull_image', { name: 'nginx:latest' });
+      expect(mockInvoke).toHaveBeenCalledWith('pull_image', { name: 'nginx:latest', onProgress: expect.any(Object) });
     });
 
     it('checkImageExists calls check_image_exists', async () => {

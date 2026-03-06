@@ -3,18 +3,15 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PullImage from './PullImage';
 import { invoke } from '@tauri-apps/api/core';
-import { listen, type Event } from '@tauri-apps/api/event';
 
 vi.mock('@tauri-apps/api/core', () => ({
   invoke: vi.fn(),
-}));
-
-vi.mock('@tauri-apps/api/event', () => ({
-  listen: vi.fn(() => Promise.resolve(() => {})),
+  Channel: class MockChannel {
+    onmessage: ((msg: unknown) => void) | null = null;
+  },
 }));
 
 const mockInvoke = vi.mocked(invoke);
-const mockListen = vi.mocked(listen);
 
 const onClose = vi.fn();
 const onSuccess = vi.fn();
@@ -22,7 +19,6 @@ const onSuccess = vi.fn();
 beforeEach(() => {
   vi.clearAllMocks();
   mockInvoke.mockResolvedValue(undefined);
-  mockListen.mockImplementation(() => Promise.resolve(() => {}));
 });
 
 describe('PullImage', () => {
@@ -40,35 +36,23 @@ describe('PullImage', () => {
     expect(input).toHaveAttribute('placeholder', 'e.g., nginx:latest, postgres:15, redis:alpine');
   });
 
-  it('pulls image after PullProgress mounts and registers listener', async () => {
-    mockListen.mockImplementation(() => {
-      return Promise.resolve(() => {});
-    });
-
+  it('invokes pull_image with Channel on form submit', async () => {
     render(<PullImage onClose={onClose} onSuccess={onSuccess} />);
 
     const input = screen.getByLabelText('Image Name');
     await userEvent.type(input, 'nginx:latest');
     await userEvent.click(screen.getByText('Pull Image'));
 
-    // PullProgress should mount first
     await waitFor(() => {
-      expect(screen.getByText('PULLING: nginx:latest')).toBeInTheDocument();
-    });
-
-    // Then invoke should be called after listener is set up
-    await waitFor(() => {
-      expect(mockInvoke).toHaveBeenCalledWith('pull_image', { name: 'nginx:latest' });
+      expect(mockInvoke).toHaveBeenCalledWith('pull_image', {
+        name: 'nginx:latest',
+        onProgress: expect.any(Object),
+      });
     });
   });
 
   it('calls onSuccess and onClose after successful pull', async () => {
-    let eventCallback: ((event: Event<unknown>) => void) | null = null;
-    mockListen.mockImplementation((_eventName, handler) => {
-      eventCallback = handler;
-      return Promise.resolve(() => {});
-    });
-
+    mockInvoke.mockResolvedValue(undefined);
     render(<PullImage onClose={onClose} onSuccess={onSuccess} />);
 
     const input = screen.getByLabelText('Image Name');
@@ -76,33 +60,9 @@ describe('PullImage', () => {
     await userEvent.click(screen.getByText('Pull Image'));
 
     await waitFor(() => {
-      expect(screen.getByText('PULLING: redis:alpine')).toBeInTheDocument();
+      expect(onSuccess).toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalled();
     });
-
-    // Simulate pull completion event from Tauri
-    eventCallback!({
-      event: 'pull-progress',
-      id: 0,
-      payload: {
-        image: 'redis:alpine',
-        id: null,
-        status: 'Pull complete',
-        progress: null,
-        current: null,
-        total: null,
-        complete: true,
-        error: null,
-      },
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('CLOSE')).toBeInTheDocument();
-    });
-
-    await userEvent.click(screen.getByText('CLOSE'));
-
-    expect(onSuccess).toHaveBeenCalled();
-    expect(onClose).toHaveBeenCalled();
   });
 
   it('shows error on pull failure', async () => {
@@ -118,8 +78,8 @@ describe('PullImage', () => {
     });
   });
 
-  it('shows pulling state', async () => {
-    mockInvoke.mockImplementation(() => new Promise(() => {}));
+  it('shows pulling state with status text', async () => {
+    mockInvoke.mockImplementation(() => new Promise(() => {})); // never resolves
     render(<PullImage onClose={onClose} onSuccess={onSuccess} />);
 
     const input = screen.getByLabelText('Image Name');
@@ -127,7 +87,8 @@ describe('PullImage', () => {
     await userEvent.click(screen.getByText('Pull Image'));
 
     await waitFor(() => {
-      expect(screen.getByText('PULLING: nginx:latest')).toBeInTheDocument();
+      expect(screen.getByText('Pulling...')).toBeInTheDocument();
+      expect(screen.getByText('PULLING...')).toBeInTheDocument();
     });
   });
 
@@ -145,5 +106,19 @@ describe('PullImage', () => {
 
     expect(screen.getByText('Please enter an image name')).toBeInTheDocument();
     expect(mockInvoke).not.toHaveBeenCalledWith('pull_image', expect.anything());
+  });
+
+  it('disables input and button while pulling', async () => {
+    mockInvoke.mockImplementation(() => new Promise(() => {}));
+    render(<PullImage onClose={onClose} onSuccess={onSuccess} />);
+
+    const input = screen.getByLabelText('Image Name');
+    await userEvent.type(input, 'nginx:latest');
+    await userEvent.click(screen.getByText('Pull Image'));
+
+    await waitFor(() => {
+      expect(input).toBeDisabled();
+      expect(screen.getByText('Pulling...')).toBeDisabled();
+    });
   });
 });

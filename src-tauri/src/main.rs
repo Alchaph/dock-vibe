@@ -9,13 +9,17 @@ use bollard::exec::{CreateExecOptions, StartExecResults, ResizeExecOptions};
 use bollard::image::{ListImagesOptions, RemoveImageOptions};
 use bollard::network::{CreateNetworkOptions};
 use bollard::volume::{CreateVolumeOptions, RemoveVolumeOptions};
+use bollard::container::PruneContainersOptions;
+use bollard::image::PruneImagesOptions;
+use bollard::network::PruneNetworksOptions;
+use bollard::volume::PruneVolumesOptions;
 use bollard::models::{ContainerSummary, HostConfig, PortBinding, Mount, MountTypeEnum, EndpointSettings};
 use serde::{Deserialize, Serialize};
 use serde_yaml;
 use reqwest;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tauri::{State, AppHandle, Emitter};
+use tauri::State;
 use tauri::ipc::Channel;
 use std::collections::HashMap;
 use tokio::io::AsyncWriteExt;
@@ -77,6 +81,20 @@ struct ImageInfo {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct ContainerStats {
+    cpu_usage: f64,
+    memory_usage: u64,
+    memory_limit: u64,
+    memory_percent: f64,
+    network_rx: u64,
+    network_tx: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct ContainerStatsEntry {
+    id: String,
+    name: String,
+    image: String,
+    state: String,
     cpu_usage: f64,
     memory_usage: u64,
     memory_limit: u64,
@@ -396,7 +414,7 @@ async fn remove_image(state: State<'_, DockerState>, id: String, force: bool) ->
 }
 
 #[tauri::command]
-async fn pull_image(app: AppHandle, state: State<'_, DockerState>, name: String) -> Result<(), String> {
+async fn pull_image(state: State<'_, DockerState>, name: String, on_progress: Channel<PullProgressEvent>) -> Result<(), String> {
     let docker = {
         let guard = state.docker.lock().await;
         guard.clone()
@@ -424,7 +442,7 @@ async fn pull_image(app: AppHandle, state: State<'_, DockerState>, name: String)
                     None => (None, None),
                 };
                 
-                let _ = app.emit("pull-progress", PullProgressEvent {
+                let _ = on_progress.send(PullProgressEvent {
                     image: name.clone(),
                     id: info.id.clone(),
                     status: info.status.unwrap_or_default(),
@@ -436,7 +454,7 @@ async fn pull_image(app: AppHandle, state: State<'_, DockerState>, name: String)
                 });
             }
             Err(e) => {
-                let _ = app.emit("pull-progress", PullProgressEvent {
+                let _ = on_progress.send(PullProgressEvent {
                     image: name.clone(),
                     id: None,
                     status: "error".to_string(),
@@ -451,7 +469,7 @@ async fn pull_image(app: AppHandle, state: State<'_, DockerState>, name: String)
         }
     }
     
-    let _ = app.emit("pull-progress", PullProgressEvent {
+    let _ = on_progress.send(PullProgressEvent {
         image: name.clone(),
         id: None,
         status: "Pull complete".to_string(),
@@ -522,6 +540,85 @@ async fn get_container_stats(state: State<'_, DockerState>, id: String) -> Resul
     } else {
         Err("Failed to retrieve stats".to_string())
     }
+}
+
+#[tauri::command]
+async fn get_all_container_stats(state: State<'_, DockerState>) -> Result<Vec<ContainerStatsEntry>, String> {
+    let docker = state.docker.lock().await;
+    
+    use futures_util::stream::StreamExt;
+    
+    let containers = docker.list_containers(None::<ListContainersOptions<String>>)
+        .await
+        .map_err(|e| format!("Failed to list containers: {}", e))?;
+    
+    let mut entries = Vec::new();
+    
+    for container in containers {
+        let id = container.id.clone().unwrap_or_default();
+        if id.is_empty() {
+            continue;
+        }
+        
+        let name = container.names
+            .as_ref()
+            .and_then(|n| n.first())
+            .map(|n| n.trim_start_matches('/').to_string())
+            .unwrap_or_default();
+        
+        let image = container.image.clone().unwrap_or_default();
+        let state_str = container.state.clone().unwrap_or_default();
+        
+        let options = Some(StatsOptions {
+            stream: false,
+            one_shot: true,
+        });
+        
+        let mut stats_stream = docker.stats(&id, options);
+        
+        if let Some(Ok(stats)) = stats_stream.next().await {
+            let cpu_delta = stats.cpu_stats.cpu_usage.total_usage as f64 
+                - stats.precpu_stats.cpu_usage.total_usage as f64;
+            let system_delta = stats.cpu_stats.system_cpu_usage.unwrap_or(0) as f64 
+                - stats.precpu_stats.system_cpu_usage.unwrap_or(0) as f64;
+            let number_cpus = stats.cpu_stats.online_cpus.unwrap_or(1) as f64;
+            
+            let cpu_usage = if system_delta > 0.0 && cpu_delta > 0.0 {
+                (cpu_delta / system_delta) * number_cpus * 100.0
+            } else {
+                0.0
+            };
+            
+            let memory_usage = stats.memory_stats.usage.unwrap_or(0);
+            let memory_limit = stats.memory_stats.limit.unwrap_or(1);
+            let memory_percent = (memory_usage as f64 / memory_limit as f64) * 100.0;
+            
+            let mut network_rx = 0u64;
+            let mut network_tx = 0u64;
+            
+            if let Some(networks) = stats.networks {
+                for (_, network) in networks {
+                    network_rx += network.rx_bytes;
+                    network_tx += network.tx_bytes;
+                }
+            }
+            
+            entries.push(ContainerStatsEntry {
+                id,
+                name,
+                image,
+                state: state_str,
+                cpu_usage,
+                memory_usage,
+                memory_limit,
+                memory_percent,
+                network_rx,
+                network_tx,
+            });
+        }
+    }
+    
+    Ok(entries)
 }
 
 // Volume Management
@@ -1096,6 +1193,60 @@ async fn search_docker_hub(query: String, limit: Option<usize>) -> Result<Vec<Re
     Ok(results)
 }
 
+#[derive(Debug, Clone, Serialize)]
+struct PruneResult {
+    containers_removed: u64,
+    images_removed: u64,
+    volumes_removed: u64,
+    networks_removed: u64,
+    space_reclaimed: u64,
+}
+
+#[tauri::command]
+async fn system_prune(state: State<'_, DockerState>, prune_volumes: bool) -> Result<PruneResult, String> {
+    let docker = state.docker.lock().await;
+
+    let container_res = docker.prune_containers(None::<PruneContainersOptions<String>>)
+        .await
+        .map_err(|e| format!("Failed to prune containers: {}", e))?;
+
+    let mut image_filters = HashMap::new();
+    image_filters.insert("dangling".to_string(), vec!["false".to_string()]);
+    let image_res = docker.prune_images(Some(PruneImagesOptions {
+        filters: image_filters,
+    }))
+        .await
+        .map_err(|e| format!("Failed to prune images: {}", e))?;
+
+    let mut volumes_removed: u64 = 0;
+    let mut volume_space: u64 = 0;
+    if prune_volumes {
+        let volume_res = docker.prune_volumes(None::<PruneVolumesOptions<String>>)
+            .await
+            .map_err(|e| format!("Failed to prune volumes: {}", e))?;
+        volumes_removed = volume_res.volumes_deleted.map(|v| v.len() as u64).unwrap_or(0);
+        volume_space = volume_res.space_reclaimed.map(|s| s as u64).unwrap_or(0);
+    }
+
+    let network_res = docker.prune_networks(None::<PruneNetworksOptions<String>>)
+        .await
+        .map_err(|e| format!("Failed to prune networks: {}", e))?;
+
+    let containers_removed = container_res.containers_deleted.map(|c| c.len() as u64).unwrap_or(0);
+    let container_space = container_res.space_reclaimed.map(|s| s as u64).unwrap_or(0);
+    let images_removed = image_res.images_deleted.map(|i| i.len() as u64).unwrap_or(0);
+    let image_space = image_res.space_reclaimed.map(|s| s as u64).unwrap_or(0);
+    let networks_removed = network_res.networks_deleted.map(|n| n.len() as u64).unwrap_or(0);
+
+    Ok(PruneResult {
+        containers_removed,
+        images_removed,
+        volumes_removed,
+        networks_removed,
+        space_reclaimed: container_space + image_space + volume_space,
+    })
+}
+
 // Terminal / Exec commands
 #[derive(Clone, Serialize)]
 struct TerminalOutputEvent {
@@ -1265,6 +1416,7 @@ fn main() {
             remove_image,
             pull_image,
             get_container_stats,
+            get_all_container_stats,
             list_volumes,
             create_volume,
             remove_volume,
@@ -1276,6 +1428,7 @@ fn main() {
             deploy_compose,
             check_image_exists,
             search_docker_hub,
+            system_prune,
             start_terminal,
             write_terminal,
             resize_terminal,

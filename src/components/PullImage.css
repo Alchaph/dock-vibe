@@ -121,3 +121,18 @@
   border: none;
   font-size: 13px;
 }
+
+.pull-status {
+  background-color: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', monospace;
+  color: var(--text-primary);
+  letter-spacing: 0.3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

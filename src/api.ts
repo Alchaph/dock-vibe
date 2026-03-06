@@ -1,5 +1,5 @@
 import { invoke, Channel } from '@tauri-apps/api/core';
-import type { ContainerInfo, ContainerDetails, ImageInfo, ContainerStats, VolumeInfo, NetworkDetails, CreateContainerRequest, ComposeDeployResult, RegistrySearchResult, TerminalOutputEvent } from './types';
+import type { ContainerInfo, ContainerDetails, ImageInfo, ContainerStats, ContainerStatsEntry, VolumeInfo, NetworkDetails, CreateContainerRequest, ComposeDeployResult, RegistrySearchResult, TerminalOutputEvent, PullProgressEvent, PruneResult } from './types';
 
 export const dockerApi = {
   async checkConnection(): Promise<boolean> {
@@ -46,6 +46,10 @@ export const dockerApi = {
     return invoke<ContainerStats>('get_container_stats', { id });
   },
 
+  async getAllContainerStats(): Promise<ContainerStatsEntry[]> {
+    return invoke<ContainerStatsEntry[]>('get_all_container_stats');
+  },
+
   async listImages(): Promise<ImageInfo[]> {
     return invoke<ImageInfo[]>('list_images');
   },
@@ -54,8 +58,12 @@ export const dockerApi = {
     return invoke('remove_image', { id, force });
   },
 
-  async pullImage(name: string): Promise<void> {
-    return invoke('pull_image', { name });
+  async pullImage(name: string, onProgress?: (event: PullProgressEvent) => void): Promise<void> {
+    const channel = new Channel<PullProgressEvent>();
+    if (onProgress) {
+      channel.onmessage = onProgress;
+    }
+    return invoke('pull_image', { name, onProgress: channel });
   },
 
   // Volume management
@@ -107,6 +115,10 @@ export const dockerApi = {
   // Docker registry search
   async searchDockerHub(query: string, limit?: number): Promise<RegistrySearchResult[]> {
     return invoke<RegistrySearchResult[]>('search_docker_hub', { query, limit });
+  },
+
+  async systemPrune(pruneVolumes: boolean = false): Promise<PruneResult> {
+    return invoke<PruneResult>('system_prune', { pruneVolumes });
   },
 
   async startTerminal(containerId: string, onOutput: (event: TerminalOutputEvent) => void): Promise<string> {
