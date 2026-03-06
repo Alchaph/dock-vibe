@@ -6,6 +6,10 @@ export const dockerApi = {
     return invoke<boolean>('check_docker_connection');
   },
 
+  async getContainerRuntime(): Promise<string> {
+    return invoke<string>('get_container_runtime');
+  },
+
   async listContainers(all: boolean = false): Promise<ContainerInfo[]> {
     return invoke<ContainerInfo[]>('list_containers', { all });
   },

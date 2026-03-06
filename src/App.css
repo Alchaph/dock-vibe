@@ -128,6 +128,17 @@ code {
   text-align: center;
 }
 
+.runtime-badge {
+  display: block;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 0.25rem;
+}
+
 .sidebar .main-nav {
   display: flex;
   flex-direction: column;

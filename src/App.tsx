@@ -42,6 +42,7 @@ function App() {
   const [pullStatus, setPullStatus] = useState('');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [confirmState, setConfirmState] = useState<{ isOpen: boolean; id: string | null }>({ isOpen: false, id: null });
+  const [containerRuntime, setContainerRuntime] = useState<string>('docker');
 
   const addToast = (type: ToastType, message: string) => {
     const id = Math.random().toString(36).substring(2, 9);
@@ -67,10 +68,12 @@ function App() {
       const connected = await dockerApi.checkConnection();
       setDockerConnected(connected);
       if (connected) {
+        const runtime = await dockerApi.getContainerRuntime();
+        setContainerRuntime(runtime);
         loadContainers();
       }
     } catch {
-      setError('Failed to connect to Docker daemon. Make sure Docker is running.');
+      setError('Failed to connect to Docker daemon. Make sure Docker or Podman is running.');
       setDockerConnected(false);
     }
   };
@@ -310,8 +313,8 @@ function App() {
           <div className="error-container">
             <div className="error-message">
               <h2>Docker Connection Failed</h2>
-              <p>{error || 'Unable to connect to Docker daemon.'}</p>
-              <p>Please make sure Docker is installed and running.</p>
+              <p>{error || 'Unable to connect to Docker or Podman daemon.'}</p>
+              <p>Please make sure Docker or Podman is installed and running.</p>
               <button onClick={checkDockerConnection} className="btn btn-primary">
                 Retry Connection
               </button>
@@ -327,6 +330,9 @@ function App() {
       <aside className="sidebar">
         <div className="sidebar-header">
           <h1>DOCK</h1>
+          <span className="runtime-badge" title={`Connected via ${containerRuntime}`}>
+            {containerRuntime}
+          </span>
         </div>
         <nav className="main-nav">
           <div className="nav-item-wrapper">
