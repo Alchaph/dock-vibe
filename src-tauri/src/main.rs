@@ -137,6 +137,7 @@ struct CreateContainerRequest {
 
 struct DockerState {
     docker: Arc<Mutex<Docker>>,
+    runtime: Arc<Mutex<String>>,
 }
 
 struct TerminalSession {
@@ -373,6 +374,12 @@ async fn check_docker_connection(state: State<'_, DockerState>) -> Result<bool, 
         Ok(_) => Ok(true),
         Err(e) => Err(format!("Docker connection failed: {}", e)),
     }
+}
+
+#[tauri::command]
+async fn get_container_runtime(state: State<'_, DockerState>) -> Result<String, String> {
+    let runtime = state.runtime.lock().await;
+    Ok(runtime.clone())
 }
 
 // Image Management
@@ -1388,15 +1395,70 @@ async fn close_terminal(
     Ok(())
 }
 
+fn try_connect_podman() -> Option<Docker> {
+    let podman_paths = get_podman_socket_paths();
+    
+    for path in podman_paths {
+        if std::path::Path::new(&path).exists() {
+            if let Ok(docker) = Docker::connect_with_socket(&path, 120, bollard::API_DEFAULT_VERSION) {
+                return Some(docker);
+            }
+        }
+    }
+    None
+}
+
+fn get_podman_socket_paths() -> Vec<String> {
+    let mut paths = Vec::new();
+    
+    // Linux rootless — /run/user/<UID>/podman/podman.sock
+    if let Ok(uid) = std::env::var("UID").or_else(|_| {
+        std::process::Command::new("id").arg("-u").output()
+            .ok()
+            .and_then(|o| String::from_utf8(o.stdout).ok())
+            .map(|s| s.trim().to_string())
+            .ok_or(std::env::VarError::NotPresent)
+    }) {
+        paths.push(format!("/run/user/{}/podman/podman.sock", uid));
+    }
+    
+    // Linux rootful
+    paths.push("/run/podman/podman.sock".to_string());
+    
+    // macOS Podman machine variants
+    if let Ok(home) = std::env::var("HOME") {
+        paths.push(format!("{}/.local/share/containers/podman/machine/podman.sock", home));
+        paths.push(format!("{}/.local/share/containers/podman/machine/qemu/podman.sock", home));
+        paths.push(format!("{}/.local/share/containers/podman/machine/podman-machine-default/podman.sock", home));
+    }
+    
+    if let Ok(xdg) = std::env::var("XDG_RUNTIME_DIR") {
+        paths.push(format!("{}/podman/podman.sock", xdg));
+    }
+    
+    paths
+}
+
 fn main() {
-    // Initialize Docker connection
-    let docker = Docker::connect_with_local_defaults()
-        .expect("Failed to connect to Docker daemon");
+    let (docker, runtime) = match Docker::connect_with_local_defaults() {
+        Ok(d) => (d, "docker".to_string()),
+        Err(_) => {
+            match try_connect_podman() {
+                Some(d) => (d, "podman".to_string()),
+                None => {
+                    let d = Docker::connect_with_local_defaults()
+                        .expect("Failed to connect to Docker or Podman. Please ensure Docker or Podman is installed.");
+                    (d, "docker".to_string())
+                }
+            }
+        }
+    };
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .manage(DockerState {
             docker: Arc::new(Mutex::new(docker)),
+            runtime: Arc::new(Mutex::new(runtime)),
         })
         .manage(TerminalState {
             sessions: Arc::new(Mutex::new(HashMap::new())),
@@ -1412,6 +1474,7 @@ fn main() {
             get_container_logs,
             get_container_details,
             check_docker_connection,
+            get_container_runtime,
             list_images,
             remove_image,
             pull_image,
