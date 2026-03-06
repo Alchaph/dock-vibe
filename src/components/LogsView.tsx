@@ -57,49 +57,15 @@ const LogsView = ({ containerId }: LogsViewProps) => {
   };
 
   const openRawLogs = () => {
-    // Create HTML content with the logs
-    const htmlContent = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Container Logs - ${containerId.substring(0, 12)}</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 20px;
-      background: #1E1E1E;
-      color: #D4D4D4;
-      font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-    pre {
-      margin: 0;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-    }
-  </style>
-</head>
-<body>
-  <pre>${logs.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
-</body>
-</html>`;
-    
-    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const blob = new Blob([logs], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
-    const newWindow = window.open(url, '_blank');
-    
-    // Clean up the URL after a short delay
-    if (newWindow) {
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    } else {
-      // Fallback: create downloadable file
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `container-logs-${containerId.substring(0, 12)}.html`;
-      link.click();
-      URL.revokeObjectURL(url);
-    }
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `container-logs-${containerId.substring(0, 12)}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const copyLogs = async () => {
@@ -164,8 +130,8 @@ const LogsView = ({ containerId }: LogsViewProps) => {
           <button onClick={copyLogs} className="btn btn-info btn-sm" title="Copy logs">
             Copy
           </button>
-          <button onClick={openRawLogs} className="btn btn-info btn-sm" title="Open in browser">
-            Open Raw
+          <button onClick={openRawLogs} className="btn btn-info btn-sm" title="Export logs to file">
+            Export
           </button>
           <button onClick={loadLogs} className="btn btn-primary" disabled={loading}>
             {loading ? 'Refreshing...' : 'Refresh'}

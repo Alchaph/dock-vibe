@@ -364,6 +364,24 @@ function App() {
       <div className="main-content">
         <header className="content-header">
           <div className="breadcrumbs">
+            {currentView === 'templates' && (
+              <span className="breadcrumb-current">Templates</span>
+            )}
+            {currentView === 'list' && (
+              <span className="breadcrumb-current">Containers</span>
+            )}
+            {currentView === 'images' && (
+              <span className="breadcrumb-current">Images</span>
+            )}
+            {currentView === 'volumes' && (
+              <span className="breadcrumb-current">Volumes</span>
+            )}
+            {currentView === 'networks' && (
+              <span className="breadcrumb-current">Networks</span>
+            )}
+            {currentView === 'dashboard' && (
+              <span className="breadcrumb-current">Dashboard</span>
+            )}
             {currentView === 'details' && (
               <>
                 <span className="breadcrumb-link" onClick={() => setCurrentView('list')}>Containers</span>

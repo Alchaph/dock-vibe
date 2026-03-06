@@ -474,8 +474,8 @@ code {
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1.5rem;
-  background: var(--metro-blue);
-  color: #fff;
+  background: var(--metro-green);
+  color: var(--text-on-accent);
   font-size: 0.9rem;
   margin: 0 1.5rem 1rem;
 }
@@ -484,10 +484,11 @@ code {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  color: var(--text-on-accent);
 }
 
 .pull-banner-status {
-  font-weight: 300;
-  opacity: 0.9;
+  font-weight: 400;
+  color: var(--text-on-accent);
   text-transform: uppercase;
 }

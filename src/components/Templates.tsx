@@ -785,6 +785,658 @@ const BUILTIN_TEMPLATES: ContainerTemplate[] = [
       command: '',
       memoryLimit: '128',
       cpuLimit: '0.5'
+    },
+    // Self-Hosted / Media
+    {
+      id: 'jellyfin',
+      name: 'Jellyfin',
+      description: 'Free media server for movies, TV, and music',
+      color: '#00A4DC',
+      image: 'jellyfin/jellyfin:latest',
+      ports: [{ containerPort: '8096/tcp', hostPort: '8096' }],
+      volumes: [
+        { source: 'jellyfin-config', target: '/config', readonly: false },
+        { source: 'jellyfin-cache', target: '/cache', readonly: false }
+      ],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '1024',
+      cpuLimit: '2'
+    },
+    {
+      id: 'plex',
+      name: 'Plex',
+      description: 'Media server for streaming your content',
+      color: '#E5A00D',
+      image: 'plexinc/pms-docker:latest',
+      ports: [{ containerPort: '32400/tcp', hostPort: '32400' }],
+      volumes: [
+        { source: 'plex-config', target: '/config', readonly: false },
+        { source: 'plex-data', target: '/data', readonly: false }
+      ],
+      envVars: [{ key: 'PLEX_CLAIM', value: '' }],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '2048',
+      cpuLimit: '2'
+    },
+    {
+      id: 'navidrome',
+      name: 'Navidrome',
+      description: 'Modern music server and streamer',
+      color: '#0D47A1',
+      image: 'deluan/navidrome:latest',
+      ports: [{ containerPort: '4533/tcp', hostPort: '4533' }],
+      volumes: [
+        { source: 'navidrome-data', target: '/data', readonly: false },
+        { source: 'navidrome-music', target: '/music', readonly: true }
+      ],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '512',
+      cpuLimit: '1'
+    },
+    {
+      id: 'audiobookshelf',
+      name: 'Audiobookshelf',
+      description: 'Self-hosted audiobook and podcast server',
+      color: '#4B0082',
+      image: 'ghcr.io/advplyr/audiobookshelf:latest',
+      ports: [{ containerPort: '80/tcp', hostPort: '13378' }],
+      volumes: [
+        { source: 'audiobookshelf-config', target: '/config', readonly: false },
+        { source: 'audiobookshelf-metadata', target: '/metadata', readonly: false }
+      ],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '512',
+      cpuLimit: '1'
+    },
+    {
+      id: 'komga',
+      name: 'Komga',
+      description: 'Media server for comics and manga',
+      color: '#2196F3',
+      image: 'gotson/komga:latest',
+      ports: [{ containerPort: '25600/tcp', hostPort: '25600' }],
+      volumes: [
+        { source: 'komga-config', target: '/config', readonly: false },
+        { source: 'komga-data', target: '/data', readonly: true }
+      ],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '512',
+      cpuLimit: '1'
+    },
+    // Self-Hosted / Productivity
+    {
+      id: 'excalidraw',
+      name: 'Excalidraw',
+      description: 'Virtual whiteboard for sketching diagrams',
+      color: '#6965DB',
+      image: 'excalidraw/excalidraw:latest',
+      ports: [{ containerPort: '80/tcp', hostPort: '3333' }],
+      volumes: [{ source: 'excalidraw-data', target: '/app/data', readonly: false }],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '256',
+      cpuLimit: '0.5'
+    },
+    {
+      id: 'trilium',
+      name: 'Trilium',
+      description: 'Hierarchical note-taking application',
+      color: '#5B9BD5',
+      image: 'zadam/trilium:latest',
+      ports: [{ containerPort: '8080/tcp', hostPort: '8094' }],
+      volumes: [{ source: 'trilium-data', target: '/home/node/trilium-data', readonly: false }],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '512',
+      cpuLimit: '1'
+    },
+    {
+      id: 'etherpad',
+      name: 'Etherpad',
+      description: 'Collaborative document editor',
+      color: '#FFA000',
+      image: 'etherpad/etherpad-lite:latest',
+      ports: [{ containerPort: '9001/tcp', hostPort: '9001' }],
+      volumes: [{ source: 'etherpad-data', target: '/opt/etherpad-lite/var', readonly: false }],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '512',
+      cpuLimit: '1'
+    },
+    {
+      id: 'kanboard',
+      name: 'Kanboard',
+      description: 'Kanban project management software',
+      color: '#333333',
+      image: 'kanboard/kanboard:latest',
+      ports: [{ containerPort: '80/tcp', hostPort: '8095' }],
+      volumes: [
+        { source: 'kanboard-data', target: '/var/www/app/data', readonly: false },
+        { source: 'kanboard-plugins', target: '/var/www/app/plugins', readonly: false }
+      ],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '256',
+      cpuLimit: '0.5'
+    },
+    {
+      id: 'planka',
+      name: 'Planka',
+      description: 'Trello-like project management tool',
+      color: '#4E79A7',
+      image: 'ghcr.io/plankanban/planka:latest',
+      ports: [{ containerPort: '1337/tcp', hostPort: '1337' }],
+      volumes: [
+        { source: 'planka-data', target: '/app/public/user-avatars', readonly: false },
+        { source: 'planka-attachments', target: '/app/public/project-background-images', readonly: false }
+      ],
+      envVars: [
+        { key: 'BASE_URL', value: 'http://localhost:1337' },
+        { key: 'DATABASE_URL', value: 'postgresql://postgres:postgres@postgres/planka' },
+        { key: 'SECRET_KEY', value: 'changeme' }
+      ],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '512',
+      cpuLimit: '1'
+    },
+    // Self-Hosted / File Management
+    {
+      id: 'paperless-ngx',
+      name: 'Paperless-ngx',
+      description: 'Document management system',
+      color: '#17541f',
+      image: 'ghcr.io/paperless-ngx/paperless-ngx:latest',
+      ports: [{ containerPort: '8000/tcp', hostPort: '8107' }],
+      volumes: [
+        { source: 'paperless-data', target: '/usr/src/paperless/data', readonly: false },
+        { source: 'paperless-media', target: '/usr/src/paperless/media', readonly: false }
+      ],
+      envVars: [
+        { key: 'PAPERLESS_SECRET_KEY', value: 'changeme' },
+        { key: 'PAPERLESS_TIME_ZONE', value: 'UTC' }
+      ],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '1024',
+      cpuLimit: '2'
+    },
+    {
+      id: 'immich',
+      name: 'Immich',
+      description: 'Self-hosted photo and video backup',
+      color: '#4250AF',
+      image: 'ghcr.io/immich-app/immich-server:latest',
+      ports: [{ containerPort: '2283/tcp', hostPort: '2283' }],
+      volumes: [
+        { source: 'immich-upload', target: '/usr/src/app/upload', readonly: false }
+      ],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '2048',
+      cpuLimit: '2'
+    },
+    {
+      id: 'filebrowser',
+      name: 'File Browser',
+      description: 'Web-based file manager',
+      color: '#00ACC1',
+      image: 'filebrowser/filebrowser:latest',
+      ports: [{ containerPort: '80/tcp', hostPort: '8097' }],
+      volumes: [
+        { source: 'filebrowser-data', target: '/srv', readonly: false },
+        { source: 'filebrowser-config', target: '/database', readonly: false }
+      ],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '256',
+      cpuLimit: '0.5'
+    },
+    {
+      id: 'syncthing',
+      name: 'Syncthing',
+      description: 'Continuous file synchronization',
+      color: '#0891D1',
+      image: 'syncthing/syncthing:latest',
+      ports: [
+        { containerPort: '8384/tcp', hostPort: '8384' },
+        { containerPort: '22000/tcp', hostPort: '22000' }
+      ],
+      volumes: [
+        { source: 'syncthing-config', target: '/var/syncthing/config', readonly: false },
+        { source: 'syncthing-data', target: '/var/syncthing', readonly: false }
+      ],
+      envVars: [
+        { key: 'PUID', value: '1000' },
+        { key: 'PGID', value: '1000' }
+      ],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '512',
+      cpuLimit: '1'
+    },
+    {
+      id: 'stirling-pdf',
+      name: 'Stirling-PDF',
+      description: 'Powerful PDF manipulation tool',
+      color: '#E53935',
+      image: 'frooodle/s-pdf:latest',
+      ports: [{ containerPort: '8080/tcp', hostPort: '8098' }],
+      volumes: [
+        { source: 'stirling-pdf-data', target: '/configs', readonly: false }
+      ],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '512',
+      cpuLimit: '1'
+    },
+    // Self-Hosted / Home Automation
+    {
+      id: 'home-assistant',
+      name: 'Home Assistant',
+      description: 'Open source home automation platform',
+      color: '#41BDF5',
+      image: 'homeassistant/home-assistant:latest',
+      ports: [{ containerPort: '8123/tcp', hostPort: '8123' }],
+      volumes: [
+        { source: 'homeassistant-config', target: '/config', readonly: false }
+      ],
+      envVars: [{ key: 'TZ', value: 'UTC' }],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '1024',
+      cpuLimit: '2'
+    },
+    {
+      id: 'node-red',
+      name: 'Node-RED',
+      description: 'Flow-based programming for IoT',
+      color: '#8F0000',
+      image: 'nodered/node-red:latest',
+      ports: [{ containerPort: '1880/tcp', hostPort: '1880' }],
+      volumes: [
+        { source: 'nodered-data', target: '/data', readonly: false }
+      ],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '512',
+      cpuLimit: '1'
+    },
+    {
+      id: 'n8n',
+      name: 'n8n',
+      description: 'Workflow automation tool',
+      color: '#EA4B71',
+      image: 'n8nio/n8n:latest',
+      ports: [{ containerPort: '5678/tcp', hostPort: '5678' }],
+      volumes: [
+        { source: 'n8n-data', target: '/home/node/.n8n', readonly: false }
+      ],
+      envVars: [{ key: 'N8N_ENCRYPTION_KEY', value: 'changeme' }],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '512',
+      cpuLimit: '1'
+    },
+    {
+      id: 'zigbee2mqtt',
+      name: 'Zigbee2MQTT',
+      description: 'Zigbee to MQTT bridge',
+      color: '#FFB300',
+      image: 'koenkk/zigbee2mqtt:latest',
+      ports: [{ containerPort: '8080/tcp', hostPort: '8099' }],
+      volumes: [
+        { source: 'zigbee2mqtt-data', target: '/app/data', readonly: false }
+      ],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '256',
+      cpuLimit: '0.5'
+    },
+    {
+      id: 'uptime-kuma',
+      name: 'Uptime Kuma',
+      description: 'Self-hosted monitoring tool',
+      color: '#5CDD8B',
+      image: 'louislam/uptime-kuma:latest',
+      ports: [{ containerPort: '3001/tcp', hostPort: '3005' }],
+      volumes: [
+        { source: 'uptime-kuma-data', target: '/app/data', readonly: false }
+      ],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '512',
+      cpuLimit: '1'
+    },
+    // Self-Hosted / Developer Tools
+    {
+      id: 'gitea',
+      name: 'Gitea',
+      description: 'Self-hosted Git service',
+      color: '#609926',
+      image: 'gitea/gitea:latest',
+      ports: [
+        { containerPort: '3000/tcp', hostPort: '3003' },
+        { containerPort: '22/tcp', hostPort: '2223' }
+      ],
+      volumes: [
+        { source: 'gitea-data', target: '/data', readonly: false }
+      ],
+      envVars: [
+        { key: 'USER_UID', value: '1000' },
+        { key: 'USER_GID', value: '1000' }
+      ],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '1024',
+      cpuLimit: '2'
+    },
+    {
+      id: 'nocodb',
+      name: 'NocoDB',
+      description: 'No-code database platform',
+      color: '#4B38B3',
+      image: 'nocodb/nocodb:latest',
+      ports: [{ containerPort: '8080/tcp', hostPort: '8100' }],
+      volumes: [
+        { source: 'nocodb-data', target: '/usr/app/data', readonly: false }
+      ],
+      envVars: [{ key: 'NC_DB', value: 'sqlite' }],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '512',
+      cpuLimit: '1'
+    },
+    {
+      id: 'gokapi',
+      name: 'Gokapi',
+      description: 'Lightweight file sharing server',
+      color: '#7B1FA2',
+      image: 'f0o/gokapi:latest',
+      ports: [{ containerPort: '53842/tcp', hostPort: '53842' }],
+      volumes: [
+        { source: 'gokapi-data', target: '/app/data', readonly: false },
+        { source: 'gokapi-config', target: '/app/config', readonly: false }
+      ],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '256',
+      cpuLimit: '0.5'
+    },
+    {
+      id: 'archivebox',
+      name: 'ArchiveBox',
+      description: 'Self-hosted web archiving',
+      color: '#FF6F00',
+      image: 'archivebox/archivebox:latest',
+      ports: [{ containerPort: '8000/tcp', hostPort: '8101' }],
+      volumes: [
+        { source: 'archivebox-data', target: '/data', readonly: false }
+      ],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '512',
+      cpuLimit: '1'
+    },
+    {
+      id: 'apprise',
+      name: 'Apprise',
+      description: 'Notification service aggregator',
+      color: '#0288D1',
+      image: 'caronc/apprise:latest',
+      ports: [{ containerPort: '8000/tcp', hostPort: '8102' }],
+      volumes: [
+        { source: 'apprise-config', target: '/config', readonly: false }
+      ],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '256',
+      cpuLimit: '0.5'
+    },
+    // Self-Hosted / Networking
+    {
+      id: 'pihole',
+      name: 'Pi-hole',
+      description: 'Network-wide ad blocker',
+      color: '#96060C',
+      image: 'pihole/pihole:latest',
+      ports: [
+        { containerPort: '80/tcp', hostPort: '8103' },
+        { containerPort: '53/udp', hostPort: '53' }
+      ],
+      volumes: [
+        { source: 'pihole-config', target: '/etc/pihole', readonly: false },
+        { source: 'pihole-dnsmasq', target: '/etc/dnsmasq.d', readonly: false }
+      ],
+      envVars: [{ key: 'WEBPASSWORD', value: 'admin' }],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '512',
+      cpuLimit: '1'
+    },
+    {
+      id: 'nginx-proxy-manager',
+      name: 'Nginx Proxy Manager',
+      description: 'Reverse proxy with SSL management',
+      color: '#F15833',
+      image: 'jc21/nginx-proxy-manager:latest',
+      ports: [
+        { containerPort: '81/tcp', hostPort: '81' },
+        { containerPort: '80/tcp', hostPort: '8108' },
+        { containerPort: '443/tcp', hostPort: '8445' }
+      ],
+      volumes: [
+        { source: 'nginx-proxy-data', target: '/data', readonly: false },
+        { source: 'nginx-proxy-letsencrypt', target: '/etc/letsencrypt', readonly: false }
+      ],
+      envVars: [{ key: 'DB_SQLITE_FILE', value: '/data/database.sqlite' }],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '512',
+      cpuLimit: '1'
+    },
+    {
+      id: 'netdata',
+      name: 'Netdata',
+      description: 'Real-time performance monitoring',
+      color: '#00AB44',
+      image: 'netdata/netdata:latest',
+      ports: [{ containerPort: '19999/tcp', hostPort: '19999' }],
+      volumes: [
+        { source: 'netdata-config', target: '/etc/netdata', readonly: false },
+        { source: 'netdata-lib', target: '/var/lib/netdata', readonly: false }
+      ],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '512',
+      cpuLimit: '1'
+    },
+    {
+      id: 'beszel',
+      name: 'Beszel',
+      description: 'Lightweight server monitoring',
+      color: '#607D8B',
+      image: 'henrygd/beszel:latest',
+      ports: [{ containerPort: '8090/tcp', hostPort: '8090' }],
+      volumes: [
+        { source: 'beszel-data', target: '/app/data', readonly: false }
+      ],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '256',
+      cpuLimit: '0.5'
+    },
+    {
+      id: 'wireguard',
+      name: 'WireGuard',
+      description: 'Fast and secure VPN',
+      color: '#88171A',
+      image: 'linuxserver/wireguard:latest',
+      ports: [{ containerPort: '51820/udp', hostPort: '51820' }],
+      volumes: [
+        { source: 'wireguard-config', target: '/config', readonly: false }
+      ],
+      envVars: [
+        { key: 'PUID', value: '1000' },
+        { key: 'PGID', value: '1000' },
+        { key: 'SERVERURL', value: 'auto' },
+        { key: 'SERVERPORT', value: '51820' }
+      ],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '256',
+      cpuLimit: '0.5'
+    },
+    // Self-Hosted / Dashboards & Utilities
+    {
+      id: 'homepage',
+      name: 'Homepage',
+      description: 'Modern application dashboard',
+      color: '#3B82F6',
+      image: 'ghcr.io/gethomepage/homepage:latest',
+      ports: [{ containerPort: '3000/tcp', hostPort: '3004' }],
+      volumes: [
+        { source: 'homepage-config', target: '/app/config', readonly: false }
+      ],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '256',
+      cpuLimit: '0.5'
+    },
+    {
+      id: 'vaultwarden',
+      name: 'Vaultwarden',
+      description: 'Lightweight Bitwarden server',
+      color: '#175DDC',
+      image: 'vaultwarden/server:latest',
+      ports: [{ containerPort: '80/tcp', hostPort: '8104' }],
+      volumes: [
+        { source: 'vaultwarden-data', target: '/data', readonly: false }
+      ],
+      envVars: [
+        { key: 'SIGNUPS_ALLOWED', value: 'true' },
+        { key: 'DOMAIN', value: 'http://localhost:8104' }
+      ],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '256',
+      cpuLimit: '0.5'
+    },
+    {
+      id: 'wallabag',
+      name: 'Wallabag',
+      description: 'Read-it-later service',
+      color: '#97BF0D',
+      image: 'wallabag/wallabag:latest',
+      ports: [{ containerPort: '80/tcp', hostPort: '8105' }],
+      volumes: [
+        { source: 'wallabag-data', target: '/var/www/wallabag/data', readonly: false },
+        { source: 'wallabag-images', target: '/var/www/wallabag/web/assets/images', readonly: false }
+      ],
+      envVars: [],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '512',
+      cpuLimit: '1'
+    },
+    {
+      id: 'linkding',
+      name: 'Linkding',
+      description: 'Self-hosted bookmark manager',
+      color: '#1565C0',
+      image: 'sissbruecker/linkding:latest',
+      ports: [{ containerPort: '9090/tcp', hostPort: '9090' }],
+      volumes: [
+        { source: 'linkding-data', target: '/etc/linkding/data', readonly: false }
+      ],
+      envVars: [
+        { key: 'LD_SUPERUSER_NAME', value: 'admin' },
+        { key: 'LD_SUPERUSER_PASSWORD', value: 'admin' }
+      ],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '256',
+      cpuLimit: '0.5'
+    },
+    {
+      id: 'freshrss',
+      name: 'FreshRSS',
+      description: 'Self-hosted RSS feed aggregator',
+      color: '#FF6D00',
+      image: 'freshrss/freshrss:latest',
+      ports: [{ containerPort: '80/tcp', hostPort: '8106' }],
+      volumes: [
+        { source: 'freshrss-data', target: '/var/www/FreshRSS/data', readonly: false },
+        { source: 'freshrss-extensions', target: '/var/www/FreshRSS/extensions', readonly: false }
+      ],
+      envVars: [
+        { key: 'TZ', value: 'UTC' },
+        { key: 'CRON_MIN', value: '1,31' }
+      ],
+      network: 'bridge',
+      restartPolicy: 'unless-stopped',
+      command: '',
+      memoryLimit: '256',
+      cpuLimit: '0.5'
     }
   ];
 
@@ -824,7 +1476,14 @@ function Templates({ onUseTemplate }: TemplatesProps) {
     { id: 'monitoring', name: 'Monitoring', filter: ['prometheus', 'grafana', 'jaeger'] },
     { id: 'devtools', name: 'Dev Tools', filter: ['jenkins', 'gitlab', 'sonarqube', 'minio'] },
     { id: 'cms', name: 'CMS & Apps', filter: ['wordpress', 'ghost', 'nextcloud'] },
-    { id: 'utilities', name: 'Utilities', filter: ['portainer', 'registry', 'vault', 'adminer', 'elasticsearch'] }
+    { id: 'utilities', name: 'Utilities', filter: ['portainer', 'registry', 'vault', 'adminer', 'elasticsearch'] },
+    { id: 'media', name: 'Media', filter: ['jellyfin', 'plex', 'navidrome', 'audiobookshelf', 'komga'] },
+    { id: 'productivity', name: 'Productivity', filter: ['excalidraw', 'trilium', 'etherpad', 'kanboard', 'planka'] },
+    { id: 'filemanagement', name: 'Files & Docs', filter: ['paperless-ngx', 'immich', 'filebrowser', 'syncthing', 'stirling-pdf'] },
+    { id: 'homeautomation', name: 'Home & IoT', filter: ['home-assistant', 'node-red', 'n8n', 'zigbee2mqtt', 'uptime-kuma'] },
+    { id: 'selfhosted-dev', name: 'Self-Hosted Dev', filter: ['gitea', 'nocodb', 'gokapi', 'archivebox', 'apprise'] },
+    { id: 'networking', name: 'Networking', filter: ['pihole', 'nginx-proxy-manager', 'netdata', 'beszel', 'wireguard'] },
+    { id: 'dashboards', name: 'Dashboards', filter: ['homepage', 'vaultwarden', 'wallabag', 'linkding', 'freshrss'] }
   ];
 
   const categoryFiltered = selectedCategory === 'all'
@@ -858,7 +1517,9 @@ function Templates({ onUseTemplate }: TemplatesProps) {
     const link = document.createElement('a');
     link.href = url;
     link.download = `${template.id}-template.json`;
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
@@ -894,7 +1555,9 @@ function Templates({ onUseTemplate }: TemplatesProps) {
     const link = document.createElement('a');
     link.href = url;
     link.download = 'custom-templates.json';
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
@@ -908,37 +1571,39 @@ function Templates({ onUseTemplate }: TemplatesProps) {
             Quick-start templates for common applications ({allTemplates.length} templates, {customTemplates.length} custom)
           </p>
         </div>
-        <div className="templates-actions">
-          <button onClick={handleImportTemplate} className="btn btn-secondary">
-            Import Template
-          </button>
-          {customTemplates.length > 0 && (
-            <button onClick={handleExportAll} className="btn btn-secondary">
-              Export All Custom
+        <div className="templates-header-right">
+          <div className="templates-search">
+            <input
+              type="text"
+              placeholder="Search templates..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="templates-search-input"
+            />
+            {searchQuery && (
+              <button
+                className="templates-search-clear"
+                onClick={() => setSearchQuery('')}
+                title="Clear search"
+              >
+                &times;
+              </button>
+            )}
+          </div>
+          <div className="templates-actions">
+            <button onClick={handleImportTemplate} className="btn btn-secondary">
+              Import Template
             </button>
-          )}
+            {customTemplates.length > 0 && (
+              <button onClick={handleExportAll} className="btn btn-secondary">
+                Export All Custom
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="templates-categories">
-        <div className="templates-search">
-          <input
-            type="text"
-            placeholder="Search templates..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="templates-search-input"
-          />
-          {searchQuery && (
-            <button
-              className="templates-search-clear"
-              onClick={() => setSearchQuery('')}
-              title="Clear search"
-            >
-              &times;
-            </button>
-          )}
-        </div>
         {categories.map(category => (
           <button
             key={category.id}
