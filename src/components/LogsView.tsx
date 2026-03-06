@@ -2,11 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { dockerApi } from '../api';
 import './LogsView.css';
 
+import type { ToastType } from './Toast';
+
 interface LogsViewProps {
   containerId: string;
+  onToast: (type: ToastType, message: string) => void;
 }
 
-const LogsView = ({ containerId }: LogsViewProps) => {
+const LogsView = ({ containerId, onToast }: LogsViewProps) => {
   const [logs, setLogs] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,9 +74,9 @@ const LogsView = ({ containerId }: LogsViewProps) => {
   const copyLogs = async () => {
     try {
       await navigator.clipboard.writeText(filteredLogs || logs);
-      alert('Logs copied to clipboard!');
+      onToast('success', 'Logs copied to clipboard!');
     } catch {
-      alert('Failed to copy logs');
+      onToast('error', 'Failed to copy logs');
     }
   };
 

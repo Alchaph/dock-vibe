@@ -9,6 +9,7 @@ vi.mock('@tauri-apps/api/core', () => ({
 }));
 
 const mockInvoke = vi.mocked(invoke);
+const mockOnToast = vi.fn();
 
 const sampleLogs = `2024-01-15 10:30:00 INFO  Server starting on port 8080
 2024-01-15 10:30:01 INFO  Database connected
@@ -26,7 +27,7 @@ beforeEach(() => {
 
 describe('LogsView', () => {
   it('renders logs content', async () => {
-    render(<LogsView containerId="abc123" />);
+    render(<LogsView containerId="abc123" onToast={mockOnToast} />);
 
     await waitFor(() => {
       expect(screen.getByText(/Server starting on port 8080/)).toBeInTheDocument();
@@ -35,7 +36,7 @@ describe('LogsView', () => {
 
   it('shows "No logs available" when logs are empty', async () => {
     mockInvoke.mockResolvedValue('');
-    render(<LogsView containerId="abc123" />);
+    render(<LogsView containerId="abc123" onToast={mockOnToast} />);
 
     await waitFor(() => {
       expect(screen.getByText('No logs available')).toBeInTheDocument();
@@ -44,14 +45,14 @@ describe('LogsView', () => {
 
   it('shows loading state while refreshing', async () => {
     mockInvoke.mockImplementation(() => new Promise(() => {}));
-    render(<LogsView containerId="abc123" />);
+    render(<LogsView containerId="abc123" onToast={mockOnToast} />);
 
     expect(screen.getByText('Refreshing...')).toBeInTheDocument();
   });
 
   describe('log controls', () => {
     it('has tail lines selector', async () => {
-      render(<LogsView containerId="abc123" />);
+      render(<LogsView containerId="abc123" onToast={mockOnToast} />);
 
       await waitFor(() => screen.getByText(/Server starting/));
 
@@ -60,14 +61,14 @@ describe('LogsView', () => {
     });
 
     it('has copy button', async () => {
-      render(<LogsView containerId="abc123" />);
+      render(<LogsView containerId="abc123" onToast={mockOnToast} />);
 
       await waitFor(() => screen.getByText(/Server starting/));
       expect(screen.getByText('Copy')).toBeInTheDocument();
     });
 
     it('copies logs to clipboard', async () => {
-      render(<LogsView containerId="abc123" />);
+      render(<LogsView containerId="abc123" onToast={mockOnToast} />);
 
       await waitFor(() => screen.getByText(/Server starting/));
       await userEvent.click(screen.getByText('Copy'));
@@ -76,21 +77,21 @@ describe('LogsView', () => {
     });
 
     it('has export button', async () => {
-      render(<LogsView containerId="abc123" />);
+      render(<LogsView containerId="abc123" onToast={mockOnToast} />);
 
       await waitFor(() => screen.getByText(/Server starting/));
       expect(screen.getByText('Export')).toBeInTheDocument();
     });
 
     it('has refresh button', async () => {
-      render(<LogsView containerId="abc123" />);
+      render(<LogsView containerId="abc123" onToast={mockOnToast} />);
 
       await waitFor(() => screen.getByText('Refresh'));
       expect(screen.getByText('Refresh')).toBeInTheDocument();
     });
 
     it('has scroll buttons', async () => {
-      render(<LogsView containerId="abc123" />);
+      render(<LogsView containerId="abc123" onToast={mockOnToast} />);
 
       await waitFor(() => screen.getByText(/Server starting/));
       expect(screen.getByText('Up')).toBeInTheDocument();
@@ -100,7 +101,7 @@ describe('LogsView', () => {
 
   describe('search functionality', () => {
     it('filters logs by search term', async () => {
-      render(<LogsView containerId="abc123" />);
+      render(<LogsView containerId="abc123" onToast={mockOnToast} />);
 
       await waitFor(() => screen.getByText(/Server starting/));
 
@@ -113,7 +114,7 @@ describe('LogsView', () => {
     });
 
     it('shows search info with match count', async () => {
-      render(<LogsView containerId="abc123" />);
+      render(<LogsView containerId="abc123" onToast={mockOnToast} />);
 
       await waitFor(() => screen.getByText(/Server starting/));
 
@@ -126,7 +127,7 @@ describe('LogsView', () => {
     });
 
     it('clears search with clear button', async () => {
-      render(<LogsView containerId="abc123" />);
+      render(<LogsView containerId="abc123" onToast={mockOnToast} />);
 
       await waitFor(() => screen.getByText(/Server starting/));
 
@@ -143,7 +144,7 @@ describe('LogsView', () => {
   describe('error handling', () => {
     it('shows error message on load failure', async () => {
       mockInvoke.mockRejectedValue(new Error('Failed to fetch logs'));
-      render(<LogsView containerId="abc123" />);
+      render(<LogsView containerId="abc123" onToast={mockOnToast} />);
 
       await waitFor(() => {
         expect(screen.getByText('Failed to fetch logs')).toBeInTheDocument();

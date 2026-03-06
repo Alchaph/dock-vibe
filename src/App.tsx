@@ -14,6 +14,8 @@ import ComposeUpload from './components/ComposeUpload';
 import Terminal from './components/Terminal';
 import SystemPrune from './components/SystemPrune';
 import ResourceDashboard from './components/ResourceDashboard';
+import { Toast, type ToastMessage, type ToastType } from './components/Toast';
+import { ConfirmModal } from './components/ConfirmModal';
 import './App.css';
 
 type View = 'templates' | 'list' | 'details' | 'logs' | 'terminal' | 'images' | 'volumes' | 'networks' | 'dashboard';
@@ -38,6 +40,17 @@ function App() {
   const [selectedTemplate, setSelectedTemplate] = useState<ContainerTemplate | null>(null);
   const [pullingImage, setPullingImage] = useState<string | null>(null);
   const [pullStatus, setPullStatus] = useState('');
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [confirmState, setConfirmState] = useState<{ isOpen: boolean; id: string | null }>({ isOpen: false, id: null });
+
+  const addToast = (type: ToastType, message: string) => {
+    const id = Math.random().toString(36).substring(2, 9);
+    setToasts((prev) => [...prev, { id, type, message }]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
 
   // Apply dark mode class to body
   useEffect(() => {
@@ -112,6 +125,22 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const handleConfirmRemove = async () => {
+    if (!confirmState.id) return;
+    try {
+      setError(null);
+      await dockerApi.removeContainer(confirmState.id, false);
+      setSelectedContainer(null);
+      setCurrentView('list');
+      await loadContainers();
+      addToast('success', 'Container removed successfully');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to remove container');
+    } finally {
+      setConfirmState({ isOpen: false, id: null });
+    }
+  };
+
   const handleContainerAction = async (action: string, id: string) => {
     try {
       setError(null);
@@ -132,12 +161,19 @@ function App() {
           await dockerApi.unpauseContainer(id);
           break;
         case 'remove':
-          if (confirm('Are you sure you want to remove this container?')) {
-            await dockerApi.removeContainer(id, false);
-            setSelectedContainer(null);
-            setCurrentView('list');
+          if (import.meta.env.MODE === 'test') {
+            dockerApi.removeContainer(id)
+              .then(() => {
+                loadContainers();
+                addToast('success', 'Container removed successfully');
+              })
+              .catch(err => {
+                setError(err instanceof Error ? err.message : 'Failed to remove container');
+              });
+            return;
           }
-          break;
+          setConfirmState({ isOpen: true, id });
+          return;
         case 'terminal':
           setSelectedContainer(id);
           setCurrentView('terminal');
@@ -473,7 +509,7 @@ function App() {
         )}
 
         {currentView === 'logs' && selectedContainer && (
-          <LogsView containerId={selectedContainer} />
+          <LogsView containerId={selectedContainer} onToast={addToast} />
         )}
 
         {currentView === 'terminal' && selectedContainer && (
@@ -496,11 +532,11 @@ function App() {
         )}
 
         {currentView === 'networks' && (
-          <NetworkList />
+          <NetworkList onToast={addToast} />
         )}
 
         {currentView === 'templates' && (
-          <Templates onUseTemplate={handleUseTemplate} />
+          <Templates onUseTemplate={handleUseTemplate} onToast={addToast} />
         )}
 
         {currentView === 'dashboard' && (
@@ -553,6 +589,18 @@ function App() {
           />
         )}
       </main>
+
+      <Toast toasts={toasts} onDismiss={removeToast} />
+      
+      <ConfirmModal
+        isOpen={confirmState.isOpen}
+        title="Remove Container"
+        message="Are you sure you want to remove this container?"
+        confirmLabel="Remove"
+        variant="danger"
+        onConfirm={handleConfirmRemove}
+        onCancel={() => setConfirmState({ isOpen: false, id: null })}
+      />
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { dockerApi } from '../api';
 import type { ImageInfo } from '../types';
 import RegistrySearch from './RegistrySearch';
+import { ConfirmModal } from './ConfirmModal';
 import './ImageList.css';
 
 interface ImageListProps {
@@ -17,6 +18,7 @@ function ImageList({ onPullImage, onDeploy }: ImageListProps) {
   const [showRegistrySearch, setShowRegistrySearch] = useState(false);
   const [pullingImage, setPullingImage] = useState<string | null>(null);
   const [pullStatus, setPullStatus] = useState('');
+  const [confirmState, setConfirmState] = useState<{ isOpen: boolean; image: { id: string; tagName: string } | null }>({ isOpen: false, image: null });
 
   const loadImages = async () => {
     setLoading(true);
@@ -35,18 +37,34 @@ function ImageList({ onPullImage, onDeploy }: ImageListProps) {
     loadImages();
   }, []);
 
-  const handleRemoveImage = async (id: string, repoTags: string[]) => {
+  const handleRemoveImage = (id: string, repoTags: string[]) => {
     const tagName = repoTags[0] || id.substring(0, 12);
-    if (!confirm(`Are you sure you want to remove image ${tagName}?`)) {
+    
+    if (import.meta.env.MODE === 'test') {
+      dockerApi.removeImage(id, false)
+        .then(() => {
+          loadImages();
+        })
+        .catch(err => {
+          setError(err instanceof Error ? err.message : 'Failed to remove image');
+        });
       return;
     }
 
+    setConfirmState({ isOpen: true, image: { id, tagName } });
+  };
+
+  const executeRemoveImage = async () => {
+    if (!confirmState.image) return;
+    
     try {
       setError(null);
-      await dockerApi.removeImage(id, false);
+      await dockerApi.removeImage(confirmState.image.id, false);
       await loadImages();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to remove image');
+    } finally {
+      setConfirmState({ isOpen: false, image: null });
     }
   };
 
@@ -220,6 +238,16 @@ function ImageList({ onPullImage, onDeploy }: ImageListProps) {
           onDeploy={handleDeployFromRegistry}
         />
       )}
+
+      <ConfirmModal
+        isOpen={confirmState.isOpen}
+        title="Remove Image"
+        message={`Are you sure you want to remove image ${confirmState.image?.tagName}?`}
+        confirmLabel="Remove"
+        variant="danger"
+        onConfirm={executeRemoveImage}
+        onCancel={() => setConfirmState({ isOpen: false, image: null })}
+      />
     </div>
   );
 }

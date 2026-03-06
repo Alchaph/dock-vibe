@@ -9,6 +9,7 @@ vi.mock('@tauri-apps/api/core', () => ({
 }));
 
 const mockInvoke = vi.mocked(invoke);
+const mockOnToast = vi.fn();
 
 const mockNetworks = [
   { id: 'net1abc', name: 'bridge', driver: 'bridge', scope: 'local' },
@@ -28,7 +29,7 @@ beforeEach(() => {
 
 describe('NetworkList', () => {
   it('renders network table with all networks', async () => {
-    render(<NetworkList />);
+    render(<NetworkList onToast={mockOnToast} />);
 
     await waitFor(() => {
       expect(screen.getByText('my-network')).toBeInTheDocument();
@@ -36,7 +37,7 @@ describe('NetworkList', () => {
   });
 
   it('shows system label for default networks', async () => {
-    render(<NetworkList />);
+    render(<NetworkList onToast={mockOnToast} />);
 
     await waitFor(() => {
       const systemLabels = screen.getAllByText('System');
@@ -45,7 +46,7 @@ describe('NetworkList', () => {
   });
 
   it('shows remove button only for non-default networks', async () => {
-    render(<NetworkList />);
+    render(<NetworkList onToast={mockOnToast} />);
 
     await waitFor(() => screen.getByText('my-network'));
 
@@ -55,7 +56,7 @@ describe('NetworkList', () => {
 
   it('shows empty state when no networks', async () => {
     mockInvoke.mockResolvedValue([]);
-    render(<NetworkList />);
+    render(<NetworkList onToast={mockOnToast} />);
 
     await waitFor(() => {
       expect(screen.getByText('No Networks Found')).toBeInTheDocument();
@@ -64,14 +65,14 @@ describe('NetworkList', () => {
 
   it('shows loading state', () => {
     mockInvoke.mockImplementation(() => new Promise(() => {}));
-    render(<NetworkList />);
+    render(<NetworkList onToast={mockOnToast} />);
 
     expect(screen.getByText('Loading networks...')).toBeInTheDocument();
   });
 
   describe('create network modal', () => {
     it('opens create network modal', async () => {
-      render(<NetworkList />);
+      render(<NetworkList onToast={mockOnToast} />);
 
       await waitFor(() => screen.getByText('Create Network'));
       await userEvent.click(screen.getByText('Create Network'));
@@ -81,7 +82,7 @@ describe('NetworkList', () => {
     });
 
     it('has driver options', async () => {
-      render(<NetworkList />);
+      render(<NetworkList onToast={mockOnToast} />);
 
       await waitFor(() => screen.getByText('Create Network'));
       await userEvent.click(screen.getByText('Create Network'));
@@ -99,7 +100,7 @@ describe('NetworkList', () => {
     });
 
     it('creates network on form submit', async () => {
-      render(<NetworkList />);
+      render(<NetworkList onToast={mockOnToast} />);
 
       await waitFor(() => screen.getByText('Create Network'));
       await userEvent.click(screen.getByText('Create Network'));
@@ -119,7 +120,7 @@ describe('NetworkList', () => {
 
   describe('remove network', () => {
     it('removes non-default network when confirmed', async () => {
-      render(<NetworkList />);
+      render(<NetworkList onToast={mockOnToast} />);
 
       await waitFor(() => screen.getByText('my-network'));
 
@@ -137,7 +138,7 @@ describe('NetworkList', () => {
         if (cmd === 'list_networks') throw new Error('Network error');
         return undefined;
       });
-      render(<NetworkList />);
+      render(<NetworkList onToast={mockOnToast} />);
 
       await waitFor(() => {
         expect(screen.getByText('No Networks Found')).toBeInTheDocument();

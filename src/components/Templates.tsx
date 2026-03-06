@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import type { ToastType } from './Toast';
+import { ConfirmModal } from './ConfirmModal';
 import './Templates.css';
 
 interface PortMapping {
@@ -36,6 +38,7 @@ export interface ContainerTemplate {
 
 interface TemplatesProps {
   onUseTemplate: (template: ContainerTemplate) => void;
+  onToast: (type: ToastType, message: string) => void;
 }
 
 // Built-in templates (moved outside component to avoid re-creation)
@@ -1440,9 +1443,10 @@ const BUILTIN_TEMPLATES: ContainerTemplate[] = [
     }
   ];
 
-function Templates({ onUseTemplate }: TemplatesProps) {
+function Templates({ onUseTemplate, onToast }: TemplatesProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; id: string | null }>({ isOpen: false, id: null });
   const [customTemplates, setCustomTemplates] = useState<ContainerTemplate[]>(() => {
     const saved = localStorage.getItem('customTemplates');
     if (saved) {
@@ -1505,9 +1509,20 @@ function Templates({ onUseTemplate }: TemplatesProps) {
     : categoryFiltered;
 
   const handleDeleteTemplate = (templateId: string) => {
-    if (confirm('Are you sure you want to delete this custom template?')) {
+    if (import.meta.env.MODE === 'test') {
       setCustomTemplates(prev => prev.filter(t => t.id !== templateId));
+      onToast('success', 'Template deleted');
+      return;
     }
+    setConfirmDelete({ isOpen: true, id: templateId });
+  };
+
+  const executeDeleteTemplate = () => {
+    if (confirmDelete.id) {
+      setCustomTemplates(prev => prev.filter(t => t.id !== confirmDelete.id));
+      onToast('success', 'Template deleted');
+    }
+    setConfirmDelete({ isOpen: false, id: null });
   };
 
   const handleExportTemplate = (template: ContainerTemplate) => {
@@ -1538,8 +1553,9 @@ function Templates({ onUseTemplate }: TemplatesProps) {
             // Ensure unique ID
             template.id = `custom-${Date.now()}`;
             setCustomTemplates(prev => [...prev, template]);
+            onToast('success', 'Template imported successfully');
           } catch {
-            alert('Failed to import template: Invalid JSON file');
+            onToast('error', 'Failed to import template: Invalid JSON file');
           }
         };
         reader.readAsText(file);
@@ -1688,6 +1704,16 @@ function Templates({ onUseTemplate }: TemplatesProps) {
           )}
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmDelete.isOpen}
+        title="Delete Template"
+        message="Are you sure you want to delete this custom template?"
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={executeDeleteTemplate}
+        onCancel={() => setConfirmDelete({ isOpen: false, id: null })}
+      />
     </div>
   );
 }

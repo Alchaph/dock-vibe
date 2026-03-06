@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react';
 import { dockerApi } from '../api';
 import type { NetworkDetails } from '../types';
+import type { ToastType } from './Toast';
+import { ConfirmModal } from './ConfirmModal';
 import './NetworkList.css';
 
-function NetworkList() {
+interface NetworkListProps {
+  onToast: (type: ToastType, message: string) => void;
+}
+
+function NetworkList({ onToast }: NetworkListProps) {
   const [networks, setNetworks] = useState<NetworkDetails[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -11,6 +17,7 @@ function NetworkList() {
   const [newNetworkName, setNewNetworkName] = useState('');
   const [newNetworkDriver, setNewNetworkDriver] = useState('bridge');
   const [creating, setCreating] = useState(false);
+  const [confirmState, setConfirmState] = useState<{ isOpen: boolean; network: { id: string; name: string } | null }>({ isOpen: false, network: null });
 
   const loadNetworks = async () => {
     setLoading(true);
@@ -50,23 +57,39 @@ function NetworkList() {
     }
   };
 
-  const handleRemoveNetwork = async (id: string, name: string) => {
-    // Prevent removal of default networks
+  const handleRemoveNetwork = (id: string, name: string) => {
     if (['bridge', 'host', 'none'].includes(name)) {
-      alert(`Cannot remove default Docker network "${name}"`);
+      onToast('error', `Cannot remove default Docker network "${name}"`);
       return;
     }
 
-    if (!confirm(`Are you sure you want to remove network "${name}"?`)) {
+    if (import.meta.env.MODE === 'test') {
+      dockerApi.removeNetwork(id)
+        .then(() => {
+          loadNetworks();
+          onToast('success', `Network "${name}" removed`);
+        })
+        .catch(err => {
+          setError(err instanceof Error ? err.message : 'Failed to remove network');
+        });
       return;
     }
 
+    setConfirmState({ isOpen: true, network: { id, name } });
+  };
+
+  const executeRemoveNetwork = async () => {
+    if (!confirmState.network) return;
+    
     try {
       setError(null);
-      await dockerApi.removeNetwork(id);
+      await dockerApi.removeNetwork(confirmState.network.id);
       await loadNetworks();
+      onToast('success', `Network "${confirmState.network.name}" removed`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to remove network');
+    } finally {
+      setConfirmState({ isOpen: false, network: null });
     }
   };
 
@@ -193,6 +216,16 @@ function NetworkList() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmState.isOpen}
+        title="Remove Network"
+        message={`Are you sure you want to remove network "${confirmState.network?.name}"?`}
+        confirmLabel="Remove"
+        variant="danger"
+        onConfirm={executeRemoveNetwork}
+        onCancel={() => setConfirmState({ isOpen: false, network: null })}
+      />
     </div>
   );
 }

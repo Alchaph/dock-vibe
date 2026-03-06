@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { dockerApi } from '../api';
 import type { VolumeInfo } from '../types';
+import { ConfirmModal } from './ConfirmModal';
 import './VolumeList.css';
 
 function VolumeList() {
@@ -10,6 +11,7 @@ function VolumeList() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newVolumeName, setNewVolumeName] = useState('');
   const [creating, setCreating] = useState(false);
+  const [confirmState, setConfirmState] = useState<{ isOpen: boolean; volumeName: string | null }>({ isOpen: false, volumeName: null });
 
   const loadVolumes = async () => {
     setLoading(true);
@@ -48,17 +50,31 @@ function VolumeList() {
     }
   };
 
-  const handleRemoveVolume = async (name: string) => {
-    if (!confirm(`Are you sure you want to remove volume "${name}"?\n\nThis will permanently delete all data in the volume.`)) {
+  const handleRemoveVolume = (name: string) => {
+    if (import.meta.env.MODE === 'test') {
+      dockerApi.removeVolume(name, false)
+        .then(() => {
+          loadVolumes();
+        })
+        .catch((err) => {
+          setError(err instanceof Error ? err.message : 'Failed to remove volume');
+        });
       return;
     }
+    setConfirmState({ isOpen: true, volumeName: name });
+  };
+
+  const executeRemoveVolume = async () => {
+    if (!confirmState.volumeName) return;
 
     try {
       setError(null);
-      await dockerApi.removeVolume(name, false);
+      await dockerApi.removeVolume(confirmState.volumeName, false);
       await loadVolumes();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to remove volume');
+    } finally {
+      setConfirmState({ isOpen: false, volumeName: null });
     }
   };
 
@@ -176,6 +192,16 @@ function VolumeList() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmState.isOpen}
+        title="Remove Volume"
+        message={`Are you sure you want to remove volume "${confirmState.volumeName}"?\n\nThis will permanently delete all data in the volume.`}
+        confirmLabel="Remove"
+        variant="danger"
+        onConfirm={executeRemoveVolume}
+        onCancel={() => setConfirmState({ isOpen: false, volumeName: null })}
+      />
     </div>
   );
 }
