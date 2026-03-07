@@ -14,11 +14,12 @@ import ComposeUpload from './components/ComposeUpload';
 import Terminal from './components/Terminal';
 import SystemPrune from './components/SystemPrune';
 import ResourceDashboard from './components/ResourceDashboard';
+import Settings from './components/Settings';
 import { Toast, type ToastMessage, type ToastType } from './components/Toast';
 import { ConfirmModal } from './components/ConfirmModal';
 import './App.css';
 
-type View = 'templates' | 'list' | 'details' | 'logs' | 'terminal' | 'images' | 'volumes' | 'networks' | 'dashboard';
+type View = 'templates' | 'dashboard' | 'list' | 'details' | 'logs' | 'terminal' | 'images' | 'volumes' | 'networks' | 'settings';
 
 function App() {
   const [containers, setContainers] = useState<ContainerInfo[]>([]);
@@ -43,6 +44,7 @@ function App() {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [confirmState, setConfirmState] = useState<{ isOpen: boolean; id: string | null }>({ isOpen: false, id: null });
   const [containerRuntime, setContainerRuntime] = useState<string>('docker');
+  const [actionLoading, setActionLoading] = useState<Record<string, string>>({});
 
   const addToast = (type: ToastType, message: string) => {
     const id = Math.random().toString(36).substring(2, 9);
@@ -117,10 +119,12 @@ function App() {
       
       switch (e.key) {
         case '1': setCurrentView('templates'); break;
-        case '2': setCurrentView('list'); break;
-        case '3': setCurrentView('images'); break;
-        case '4': setCurrentView('volumes'); break;
-        case '5': setCurrentView('networks'); break;
+        case '2': setCurrentView('dashboard'); break;
+        case '3': setCurrentView('list'); break;
+        case '4': setCurrentView('images'); break;
+        case '5': setCurrentView('volumes'); break;
+        case '6': setCurrentView('networks'); break;
+        case '7': setCurrentView('settings'); break;
       }
     };
     
@@ -130,9 +134,12 @@ function App() {
 
   const handleConfirmRemove = async () => {
     if (!confirmState.id) return;
+    const id = confirmState.id;
+    setConfirmState({ isOpen: false, id: null });
+    setActionLoading((prev) => ({ ...prev, [id]: 'remove' }));
     try {
       setError(null);
-      await dockerApi.removeContainer(confirmState.id, false);
+      await dockerApi.removeContainer(id, false);
       setSelectedContainer(null);
       setCurrentView('list');
       await loadContainers();
@@ -140,51 +147,78 @@ function App() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to remove container');
     } finally {
-      setConfirmState({ isOpen: false, id: null });
+      setActionLoading((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
     }
   };
 
   const handleContainerAction = async (action: string, id: string) => {
+    if (action === 'terminal') {
+      setSelectedContainer(id);
+      setCurrentView('terminal');
+      return;
+    }
+    if (action === 'remove') {
+      if (import.meta.env.MODE === 'test') {
+        setActionLoading((prev) => ({ ...prev, [id]: 'remove' }));
+        dockerApi.removeContainer(id)
+          .then(() => {
+            loadContainers();
+            addToast('success', 'Container removed successfully');
+          })
+          .catch(err => {
+            setError(err instanceof Error ? err.message : 'Failed to remove container');
+          })
+          .finally(() => {
+            setActionLoading((prev) => {
+              const next = { ...prev };
+              delete next[id];
+              return next;
+            });
+          });
+        return;
+      }
+      setConfirmState({ isOpen: true, id });
+      return;
+    }
+
+    setActionLoading((prev) => ({ ...prev, [id]: action }));
     try {
       setError(null);
       switch (action) {
         case 'start':
           await dockerApi.startContainer(id);
+          addToast('success', 'Container started');
           break;
         case 'stop':
           await dockerApi.stopContainer(id);
+          addToast('success', 'Container stopped');
           break;
         case 'restart':
           await dockerApi.restartContainer(id);
+          addToast('success', 'Container restarted');
           break;
         case 'pause':
           await dockerApi.pauseContainer(id);
+          addToast('success', 'Container paused');
           break;
         case 'unpause':
           await dockerApi.unpauseContainer(id);
+          addToast('success', 'Container unpaused');
           break;
-        case 'remove':
-          if (import.meta.env.MODE === 'test') {
-            dockerApi.removeContainer(id)
-              .then(() => {
-                loadContainers();
-                addToast('success', 'Container removed successfully');
-              })
-              .catch(err => {
-                setError(err instanceof Error ? err.message : 'Failed to remove container');
-              });
-            return;
-          }
-          setConfirmState({ isOpen: true, id });
-          return;
-        case 'terminal':
-          setSelectedContainer(id);
-          setCurrentView('terminal');
-          return;
       }
       await loadContainers();
     } catch (err) {
       setError(err instanceof Error ? err.message : `Failed to ${action} container`);
+    } finally {
+      setActionLoading((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
     }
   };
 
@@ -345,6 +379,14 @@ function App() {
           </div>
           <div className="nav-item-wrapper">
             <button 
+              onClick={() => setCurrentView('dashboard')}
+              className={`nav-btn ${currentView === 'dashboard' ? 'active' : ''}`}
+            >
+              Dashboard
+            </button>
+          </div>
+          <div className="nav-item-wrapper">
+            <button 
               onClick={() => setCurrentView('list')}
               className={`nav-btn ${currentView === 'list' ? 'active' : ''}`}
             >
@@ -378,10 +420,10 @@ function App() {
           </div>
           <div className="nav-item-wrapper">
             <button 
-              onClick={() => setCurrentView('dashboard')}
-              className={`nav-btn ${currentView === 'dashboard' ? 'active' : ''}`}
+              onClick={() => setCurrentView('settings')}
+              className={`nav-btn ${currentView === 'settings' ? 'active' : ''}`}
             >
-              Dashboard
+              Settings
             </button>
           </div>
         </nav>
@@ -423,6 +465,9 @@ function App() {
             )}
             {currentView === 'dashboard' && (
               <span className="breadcrumb-current">Dashboard</span>
+            )}
+            {currentView === 'settings' && (
+              <span className="breadcrumb-current">Settings</span>
             )}
             {currentView === 'details' && (
               <>
@@ -504,6 +549,7 @@ function App() {
             onViewDetails={handleViewDetails}
             onViewLogs={handleViewLogs}
             loading={loading}
+            actionLoading={actionLoading}
           />
         )}
 
@@ -511,6 +557,7 @@ function App() {
           <ContainerDetailsView
             details={containerDetails}
             onAction={handleContainerAction}
+            actionLoading={actionLoading}
           />
         )}
 
@@ -547,6 +594,14 @@ function App() {
 
         {currentView === 'dashboard' && (
           <ResourceDashboard />
+        )}
+
+        {currentView === 'settings' && (
+          <Settings
+            darkMode={darkMode}
+            onToggleDarkMode={() => setDarkMode(!darkMode)}
+            onToast={addToast}
+          />
         )}
 
         {showPullImage && (

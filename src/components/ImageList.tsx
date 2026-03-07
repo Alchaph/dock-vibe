@@ -19,6 +19,7 @@ function ImageList({ onPullImage, onDeploy }: ImageListProps) {
   const [pullingImage, setPullingImage] = useState<string | null>(null);
   const [pullStatus, setPullStatus] = useState('');
   const [confirmState, setConfirmState] = useState<{ isOpen: boolean; image: { id: string; tagName: string } | null }>({ isOpen: false, image: null });
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   const loadImages = async () => {
     setLoading(true);
@@ -41,12 +42,16 @@ function ImageList({ onPullImage, onDeploy }: ImageListProps) {
     const tagName = repoTags[0] || id.substring(0, 12);
     
     if (import.meta.env.MODE === 'test') {
+      setRemovingId(id);
       dockerApi.removeImage(id, false)
         .then(() => {
           loadImages();
         })
         .catch(err => {
           setError(err instanceof Error ? err.message : 'Failed to remove image');
+        })
+        .finally(() => {
+          setRemovingId(null);
         });
       return;
     }
@@ -56,15 +61,18 @@ function ImageList({ onPullImage, onDeploy }: ImageListProps) {
 
   const executeRemoveImage = async () => {
     if (!confirmState.image) return;
+    const imageId = confirmState.image.id;
+    setConfirmState({ isOpen: false, image: null });
+    setRemovingId(imageId);
     
     try {
       setError(null);
-      await dockerApi.removeImage(confirmState.image.id, false);
+      await dockerApi.removeImage(imageId, false);
       await loadImages();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to remove image');
     } finally {
-      setConfirmState({ isOpen: false, image: null });
+      setRemovingId(null);
     }
   };
 
@@ -221,8 +229,9 @@ function ImageList({ onPullImage, onDeploy }: ImageListProps) {
                 <button
                   onClick={() => handleRemoveImage(image.id, image.repo_tags)}
                   className="btn btn-danger btn-sm"
+                  disabled={removingId === image.id}
                 >
-                  Remove
+                  {removingId === image.id ? 'Removing...' : 'Remove'}
                 </button>
               </td>
             </tr>

@@ -9,9 +9,10 @@ interface ContainerListProps {
   onViewDetails: (id: string) => void;
   onViewLogs: (id: string) => void;
   loading: boolean;
+  actionLoading?: Record<string, string>;
 }
 
-const ContainerList = ({ containers, onAction, onViewDetails, onViewLogs, loading }: ContainerListProps) => {
+const ContainerList = ({ containers, onAction, onViewDetails, onViewLogs, loading, actionLoading = {} }: ContainerListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const getStatusColor = (state: string) => {
@@ -187,20 +188,31 @@ const ContainerList = ({ containers, onAction, onViewDetails, onViewLogs, loadin
                         onClick={() => onAction('stop', container.id)}
                         className="btn btn-sm btn-warning"
                         title="Stop"
+                        disabled={!!actionLoading[container.id]}
                       >
-                        Stop
+                        {actionLoading[container.id] === 'stop' ? 'Stopping...' : 'Stop'}
                       </button>
                       <button
                         onClick={() => onAction('restart', container.id)}
                         className="btn btn-sm btn-secondary"
                         title="Restart"
+                        disabled={!!actionLoading[container.id]}
                       >
-                        Restart
+                        {actionLoading[container.id] === 'restart' ? 'Restarting...' : 'Restart'}
+                      </button>
+                      <button
+                        onClick={() => onAction('pause', container.id)}
+                        className="btn btn-sm btn-info"
+                        title="Pause"
+                        disabled={!!actionLoading[container.id]}
+                      >
+                        {actionLoading[container.id] === 'pause' ? 'Pausing...' : 'Pause'}
                       </button>
                       <button
                         onClick={() => onViewLogs(container.id)}
                         className="btn btn-sm btn-info"
                         title="Logs"
+                        disabled={!!actionLoading[container.id]}
                       >
                         Logs
                       </button>
@@ -212,15 +224,17 @@ const ContainerList = ({ containers, onAction, onViewDetails, onViewLogs, loadin
                         onClick={() => onAction('start', container.id)}
                         className="btn btn-sm btn-success"
                         title="Start"
+                        disabled={!!actionLoading[container.id]}
                       >
-                        Start
+                        {actionLoading[container.id] === 'start' ? 'Starting...' : 'Start'}
                       </button>
                       <button
                         onClick={() => onAction('remove', container.id)}
                         className="btn btn-sm btn-danger"
                         title="Remove"
+                        disabled={!!actionLoading[container.id]}
                       >
-                        Remove
+                        {actionLoading[container.id] === 'remove' ? 'Removing...' : 'Remove'}
                       </button>
                     </>
                   )}
@@ -229,8 +243,9 @@ const ContainerList = ({ containers, onAction, onViewDetails, onViewLogs, loadin
                       onClick={() => onAction('unpause', container.id)}
                       className="btn btn-sm btn-primary"
                       title="Unpause"
+                      disabled={!!actionLoading[container.id]}
                     >
-                      Unpause
+                      {actionLoading[container.id] === 'unpause' ? 'Unpausing...' : 'Unpause'}
                     </button>
                   )}
                 </div>

@@ -18,6 +18,7 @@ function NetworkList({ onToast }: NetworkListProps) {
   const [newNetworkDriver, setNewNetworkDriver] = useState('bridge');
   const [creating, setCreating] = useState(false);
   const [confirmState, setConfirmState] = useState<{ isOpen: boolean; network: { id: string; name: string } | null }>({ isOpen: false, network: null });
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   const loadNetworks = async () => {
     setLoading(true);
@@ -64,6 +65,7 @@ function NetworkList({ onToast }: NetworkListProps) {
     }
 
     if (import.meta.env.MODE === 'test') {
+      setRemovingId(id);
       dockerApi.removeNetwork(id)
         .then(() => {
           loadNetworks();
@@ -71,6 +73,9 @@ function NetworkList({ onToast }: NetworkListProps) {
         })
         .catch(err => {
           setError(err instanceof Error ? err.message : 'Failed to remove network');
+        })
+        .finally(() => {
+          setRemovingId(null);
         });
       return;
     }
@@ -80,16 +85,19 @@ function NetworkList({ onToast }: NetworkListProps) {
 
   const executeRemoveNetwork = async () => {
     if (!confirmState.network) return;
+    const network = confirmState.network;
+    setConfirmState({ isOpen: false, network: null });
+    setRemovingId(network.id);
     
     try {
       setError(null);
-      await dockerApi.removeNetwork(confirmState.network.id);
+      await dockerApi.removeNetwork(network.id);
       await loadNetworks();
-      onToast('success', `Network "${confirmState.network.name}" removed`);
+      onToast('success', `Network "${network.name}" removed`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to remove network');
     } finally {
-      setConfirmState({ isOpen: false, network: null });
+      setRemovingId(null);
     }
   };
 
@@ -144,8 +152,9 @@ function NetworkList({ onToast }: NetworkListProps) {
                   <button
                     onClick={() => handleRemoveNetwork(network.id, network.name)}
                     className="btn btn-danger btn-sm"
+                    disabled={removingId === network.id}
                   >
-                    Remove
+                    {removingId === network.id ? 'Removing...' : 'Remove'}
                   </button>
                 ) : (
                   <span className="text-muted">System</span>

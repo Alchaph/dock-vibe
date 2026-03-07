@@ -1,0 +1,120 @@
+import { useState } from 'react';
+import type { ToastType } from './Toast';
+import './Settings.css';
+
+interface SettingsProps {
+  darkMode: boolean;
+  onToggleDarkMode: () => void;
+  onToast: (type: ToastType, message: string) => void;
+}
+
+function Settings({ darkMode, onToggleDarkMode, onToast }: SettingsProps) {
+  const [refreshInterval, setRefreshInterval] = useState(() => {
+    const saved = localStorage.getItem('refreshInterval');
+    return saved ? Number(saved) : 5;
+  });
+  const [showAllDefault, setShowAllDefault] = useState(() => {
+    const saved = localStorage.getItem('showAllDefault');
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [confirmDestructive, setConfirmDestructive] = useState(() => {
+    const saved = localStorage.getItem('confirmDestructive');
+    return saved ? JSON.parse(saved) : true;
+  });
+
+  const handleRefreshIntervalChange = (value: number) => {
+    setRefreshInterval(value);
+    localStorage.setItem('refreshInterval', String(value));
+    onToast('success', `Refresh interval set to ${value}s`);
+  };
+
+  const handleShowAllDefaultChange = (value: boolean) => {
+    setShowAllDefault(value);
+    localStorage.setItem('showAllDefault', JSON.stringify(value));
+    onToast('success', value ? 'Showing all containers by default' : 'Showing running containers by default');
+  };
+
+  const handleConfirmDestructiveChange = (value: boolean) => {
+    setConfirmDestructive(value);
+    localStorage.setItem('confirmDestructive', JSON.stringify(value));
+    onToast('success', value ? 'Confirmation dialogs enabled' : 'Confirmation dialogs disabled');
+  };
+
+  return (
+    <div className="settings-page">
+      <div className="settings-section">
+        <h2>Appearance</h2>
+        <div className="setting-item">
+          <div className="setting-info">
+            <label>Dark Mode</label>
+            <p className="setting-description">Switch between light and dark theme</p>
+          </div>
+          <button
+            onClick={onToggleDarkMode}
+            className={`btn toggle-btn ${darkMode ? 'toggle-on' : 'toggle-off'}`}
+          >
+            {darkMode ? 'ON' : 'OFF'}
+          </button>
+        </div>
+      </div>
+
+      <div className="settings-section">
+        <h2>General</h2>
+        <div className="setting-item">
+          <div className="setting-info">
+            <label>Auto-refresh Interval</label>
+            <p className="setting-description">How often to refresh container data (in seconds)</p>
+          </div>
+          <select
+            value={refreshInterval}
+            onChange={(e) => handleRefreshIntervalChange(Number(e.target.value))}
+            className="setting-select"
+          >
+            <option value={2}>2s</option>
+            <option value={5}>5s</option>
+            <option value={10}>10s</option>
+            <option value={15}>15s</option>
+            <option value={30}>30s</option>
+          </select>
+        </div>
+        <div className="setting-item">
+          <div className="setting-info">
+            <label>Show All Containers</label>
+            <p className="setting-description">Show stopped containers by default</p>
+          </div>
+          <button
+            onClick={() => handleShowAllDefaultChange(!showAllDefault)}
+            className={`btn toggle-btn ${showAllDefault ? 'toggle-on' : 'toggle-off'}`}
+          >
+            {showAllDefault ? 'ON' : 'OFF'}
+          </button>
+        </div>
+        <div className="setting-item">
+          <div className="setting-info">
+            <label>Confirm Destructive Actions</label>
+            <p className="setting-description">Show confirmation dialog before removing containers, images, volumes, and networks</p>
+          </div>
+          <button
+            onClick={() => handleConfirmDestructiveChange(!confirmDestructive)}
+            className={`btn toggle-btn ${confirmDestructive ? 'toggle-on' : 'toggle-off'}`}
+          >
+            {confirmDestructive ? 'ON' : 'OFF'}
+          </button>
+        </div>
+      </div>
+
+      <div className="settings-section">
+        <h2>About</h2>
+        <div className="setting-item">
+          <div className="setting-info">
+            <label>Dock</label>
+            <p className="setting-description">Modern cross-platform Docker GUI Manager</p>
+          </div>
+          <span className="setting-value">v1.0.0</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Settings;

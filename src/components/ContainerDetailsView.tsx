@@ -7,9 +7,10 @@ import './ContainerDetails.css';
 interface ContainerDetailsViewProps {
   details: ContainerDetails;
   onAction: (action: string, id: string) => void;
+  actionLoading?: Record<string, string>;
 }
 
-const ContainerDetailsView = ({ details, onAction }: ContainerDetailsViewProps) => {
+const ContainerDetailsView = ({ details, onAction, actionLoading = {} }: ContainerDetailsViewProps) => {
   const [stats, setStats] = useState<ContainerStats | null>(null);
   const [statsError, setStatsError] = useState<string | null>(null);
 
@@ -49,35 +50,37 @@ const ContainerDetailsView = ({ details, onAction }: ContainerDetailsViewProps) 
           <button
             onClick={() => onAction('start', details.id)}
             className="btn btn-success"
-            disabled={details.state.toLowerCase() === 'running'}
+            disabled={details.state.toLowerCase() === 'running' || !!actionLoading[details.id]}
           >
-            Start
+            {actionLoading[details.id] === 'start' ? 'Starting...' : 'Start'}
           </button>
           <button
             onClick={() => onAction('stop', details.id)}
             className="btn btn-warning"
-            disabled={details.state.toLowerCase() !== 'running'}
+            disabled={details.state.toLowerCase() !== 'running' || !!actionLoading[details.id]}
           >
-            Stop
+            {actionLoading[details.id] === 'stop' ? 'Stopping...' : 'Stop'}
           </button>
           <button
             onClick={() => onAction('restart', details.id)}
             className="btn btn-secondary"
+            disabled={!!actionLoading[details.id]}
           >
-            Restart
+            {actionLoading[details.id] === 'restart' ? 'Restarting...' : 'Restart'}
           </button>
           <button
             onClick={() => onAction('terminal', details.id)}
             className="btn btn-secondary"
-            disabled={details.state.toLowerCase() !== 'running'}
+            disabled={details.state.toLowerCase() !== 'running' || !!actionLoading[details.id]}
           >
             Terminal
           </button>
           <button
             onClick={() => onAction('remove', details.id)}
             className="btn btn-danger"
+            disabled={!!actionLoading[details.id]}
           >
-            Remove
+            {actionLoading[details.id] === 'remove' ? 'Removing...' : 'Remove'}
           </button>
         </div>
       </div>

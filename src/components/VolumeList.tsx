@@ -12,6 +12,7 @@ function VolumeList() {
   const [newVolumeName, setNewVolumeName] = useState('');
   const [creating, setCreating] = useState(false);
   const [confirmState, setConfirmState] = useState<{ isOpen: boolean; volumeName: string | null }>({ isOpen: false, volumeName: null });
+  const [removingName, setRemovingName] = useState<string | null>(null);
 
   const loadVolumes = async () => {
     setLoading(true);
@@ -52,12 +53,16 @@ function VolumeList() {
 
   const handleRemoveVolume = (name: string) => {
     if (import.meta.env.MODE === 'test') {
+      setRemovingName(name);
       dockerApi.removeVolume(name, false)
         .then(() => {
           loadVolumes();
         })
         .catch((err) => {
           setError(err instanceof Error ? err.message : 'Failed to remove volume');
+        })
+        .finally(() => {
+          setRemovingName(null);
         });
       return;
     }
@@ -66,15 +71,18 @@ function VolumeList() {
 
   const executeRemoveVolume = async () => {
     if (!confirmState.volumeName) return;
+    const volumeName = confirmState.volumeName;
+    setConfirmState({ isOpen: false, volumeName: null });
+    setRemovingName(volumeName);
 
     try {
       setError(null);
-      await dockerApi.removeVolume(confirmState.volumeName, false);
+      await dockerApi.removeVolume(volumeName, false);
       await loadVolumes();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to remove volume');
     } finally {
-      setConfirmState({ isOpen: false, volumeName: null });
+      setRemovingName(null);
     }
   };
 
@@ -137,8 +145,9 @@ function VolumeList() {
                 <button
                   onClick={() => handleRemoveVolume(volume.name)}
                   className="btn btn-danger btn-sm"
+                  disabled={removingName === volume.name}
                 >
-                  Remove
+                  {removingName === volume.name ? 'Removing...' : 'Remove'}
                 </button>
               </td>
             </tr>
