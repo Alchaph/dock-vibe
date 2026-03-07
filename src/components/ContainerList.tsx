@@ -11,9 +11,12 @@ interface ContainerListProps {
   onViewLogs: (id: string) => void;
   loading: boolean;
   actionLoading?: Record<string, string>;
+  imageUpdates?: Record<string, boolean>;
+  onCheckUpdates?: () => void;
+  checkingUpdates?: boolean;
 }
 
-const ContainerList = ({ containers, onAction, onViewDetails, onViewLogs, loading, actionLoading = {} }: ContainerListProps) => {
+const ContainerList = ({ containers, onAction, onViewDetails, onViewLogs, loading, actionLoading = {}, imageUpdates = {}, onCheckUpdates, checkingUpdates = false }: ContainerListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; container: ContainerInfo } | null>(null);
 
@@ -116,6 +119,16 @@ const ContainerList = ({ containers, onAction, onViewDetails, onViewLogs, loadin
             X
           </button>
         )}
+        {onCheckUpdates && (
+          <button
+            onClick={onCheckUpdates}
+            className="btn btn-sm btn-secondary check-updates-btn"
+            disabled={checkingUpdates}
+            title="Check for image updates"
+          >
+            {checkingUpdates ? 'Checking...' : 'Check Updates'}
+          </button>
+        )}
       </div>
 
       {filteredContainers.length === 0 ? (
@@ -150,7 +163,12 @@ const ContainerList = ({ containers, onAction, onViewDetails, onViewLogs, loadin
                   {container.name || container.id.substring(0, 12)}
                 </button>
               </td>
-              <td className="image-cell">{container.image}</td>
+              <td className="image-cell">
+                {container.image}
+                {imageUpdates[container.image] && (
+                  <span className="update-badge" title="Image update available">UPDATE</span>
+                )}
+              </td>
               <td>
                 <span className={`status-badge ${getStatusColor(container.state)}`}>
                   {container.state}

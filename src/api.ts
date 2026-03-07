@@ -1,5 +1,5 @@
 import { invoke, Channel } from '@tauri-apps/api/core';
-import type { ContainerInfo, ContainerDetails, ImageInfo, ContainerStats, ContainerStatsEntry, VolumeInfo, NetworkDetails, CreateContainerRequest, ComposeDeployResult, RegistrySearchResult, TerminalOutputEvent, PullProgressEvent, PruneResult } from './types';
+import type { ContainerInfo, ContainerDetails, ImageInfo, ContainerStats, ContainerStatsEntry, VolumeInfo, NetworkDetails, CreateContainerRequest, ComposeDeployResult, RegistrySearchResult, TerminalOutputEvent, PullProgressEvent, PruneResult, ImageUpdateInfo } from './types';
 
 export const dockerApi = {
   async checkConnection(): Promise<boolean> {
@@ -141,5 +141,17 @@ export const dockerApi = {
 
   async closeTerminal(containerId: string): Promise<void> {
     return invoke('close_terminal', { containerId });
+  },
+
+  async checkImageUpdates(images: string[]): Promise<ImageUpdateInfo[]> {
+    return invoke<ImageUpdateInfo[]>('check_image_updates', { images });
+  },
+
+  async updateContainer(id: string, onProgress?: (event: PullProgressEvent) => void): Promise<void> {
+    const channel = new Channel<PullProgressEvent>();
+    if (onProgress) {
+      channel.onmessage = onProgress;
+    }
+    return invoke('update_container', { id, onProgress: channel });
   },
 };

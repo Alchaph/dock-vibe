@@ -1,0 +1,70 @@
+.update-banner {
+  background: var(--metro-cobalt, #0050ef);
+  color: white;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  z-index: 1000;
+}
+
+.update-banner-error {
+  background: var(--metro-red, #e51400);
+}
+
+.update-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 100%;
+}
+
+.update-banner-text {
+  font-weight: 500;
+}
+
+.update-banner-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.update-banner .btn-sm {
+  padding: 3px 12px;
+  font-size: 11px;
+  min-width: auto;
+}
+
+.update-banner .btn-primary {
+  background: white;
+  color: var(--metro-cobalt, #0050ef);
+  border: none;
+}
+
+.update-banner .btn-primary:hover {
+  background: #f0f0f0;
+}
+
+.update-banner .btn-secondary {
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255,255,255,0.5);
+}
+
+.update-banner .btn-secondary:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.update-progress-bar {
+  width: 200px;
+  height: 4px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.update-progress-fill {
+  height: 100%;
+  background: white;
+  transition: width 0.3s ease;
+}

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { dockerApi } from '../api';
+import { useRefreshInterval } from '../hooks/useRefreshInterval';
 import type { ContainerStatsEntry } from '../types';
 import './ResourceDashboard.css';
 
@@ -22,6 +23,7 @@ const ResourceDashboard = () => {
   const [stats, setStats] = useState<ContainerStatsEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const refreshMs = useRefreshInterval();
 
   const fetchData = useCallback(async (isPolling = false) => {
     try {
@@ -40,9 +42,9 @@ const ResourceDashboard = () => {
     fetchData();
     const intervalId = setInterval(() => {
       fetchData(true);
-    }, 3000);
+    }, refreshMs);
     return () => clearInterval(intervalId);
-  }, [fetchData]);
+  }, [fetchData, refreshMs]);
 
   if (isLoading && stats.length === 0) {
     return <div className="dashboard-loading">LOADING RESOURCE STATISTICS...</div>;

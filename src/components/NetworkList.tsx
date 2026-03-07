@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { dockerApi } from '../api';
+import { useRefreshInterval } from '../hooks/useRefreshInterval';
 import type { NetworkDetails } from '../types';
 import type { ToastType } from './Toast';
 import { ConfirmModal } from './ConfirmModal';
@@ -33,9 +34,13 @@ function NetworkList({ onToast }: NetworkListProps) {
     }
   };
 
+  const refreshMs = useRefreshInterval();
+
   useEffect(() => {
     loadNetworks();
-  }, []);
+    const interval = setInterval(loadNetworks, refreshMs);
+    return () => clearInterval(interval);
+  }, [refreshMs]);
 
   const handleCreateNetwork = async (e: React.FormEvent) => {
     e.preventDefault();

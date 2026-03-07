@@ -162,6 +162,15 @@ struct PullProgressEvent {
     error: Option<String>,
 }
 
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ImageUpdateInfo {
+    image: String,
+    current_digest: Option<String>,
+    has_update: bool,
+    error: Option<String>,
+}
+
 fn convert_container_summary(container: ContainerSummary) -> ContainerInfo {
     let ports = container.ports.unwrap_or_default()
         .iter()
@@ -1395,6 +1404,266 @@ async fn close_terminal(
     Ok(())
 }
 
+fn parse_image_name(image: &str) -> Option<(String, String)> {
+    let image = image.trim();
+    if image.is_empty() {
+        return None;
+    }
+
+    let parts: Vec<&str> = image.splitn(2, ':').collect();
+    let name = parts[0];
+    let tag = if parts.len() > 1 { parts[1] } else { "latest" };
+
+    if name.contains('.') && name.split('.').next().map(|s| s.len() > 0).unwrap_or(false) {
+        if name.matches('/').count() >= 2 {
+            return None;
+        }
+    }
+
+    let full_name = if name.contains('/') {
+        name.to_string()
+    } else {
+        format!("library/{}", name)
+    };
+
+    Some((full_name, tag.to_string()))
+}
+
+async fn get_registry_digest(name: &str, tag: &str) -> Result<String, String> {
+    let client = reqwest::Client::new();
+
+    let token_url = format!(
+        "https://auth.docker.io/token?service=registry.docker.io&scope=repository:{}:pull",
+        name
+    );
+    let token_resp: serde_json::Value = client
+        .get(&token_url)
+        .send()
+        .await
+        .map_err(|e| format!("Token request failed: {}", e))?
+        .json()
+        .await
+        .map_err(|e| format!("Token parse failed: {}", e))?;
+
+    let token = token_resp["token"]
+        .as_str()
+        .ok_or_else(|| "No token in response".to_string())?;
+
+    let manifest_url = format!(
+        "https://registry-1.docker.io/v2/{}/manifests/{}",
+        name, tag
+    );
+    let resp = client
+        .get(&manifest_url)
+        .header("Authorization", format!("Bearer {}", token))
+        .header(
+            "Accept",
+            "application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json",
+        )
+        .send()
+        .await
+        .map_err(|e| format!("Manifest request failed: {}", e))?;
+
+    let digest = resp
+        .headers()
+        .get("docker-content-digest")
+        .and_then(|v| v.to_str().ok())
+        .map(|s| s.to_string())
+        .ok_or_else(|| "No digest in manifest response".to_string())?;
+
+    Ok(digest)
+}
+
+#[tauri::command]
+async fn check_image_updates(
+    state: State<'_, DockerState>,
+    images: Vec<String>,
+) -> Result<Vec<ImageUpdateInfo>, String> {
+    let docker = state.docker.lock().await;
+    let mut results = Vec::new();
+
+    for image_str in images {
+        let (name, tag) = match parse_image_name(&image_str) {
+            Some(v) => v,
+            None => {
+                results.push(ImageUpdateInfo {
+                    image: image_str.clone(),
+                    current_digest: None,
+                    has_update: false,
+                    error: Some("Unsupported image format".to_string()),
+                });
+                continue;
+            }
+        };
+
+        let local_image = match docker.inspect_image(&image_str).await {
+            Ok(img) => img,
+            Err(_) => {
+                results.push(ImageUpdateInfo {
+                    image: image_str.clone(),
+                    current_digest: None,
+                    has_update: false,
+                    error: Some("Image not found locally".to_string()),
+                });
+                continue;
+            }
+        };
+
+        let local_digests = local_image.repo_digests.unwrap_or_default();
+        let local_digest = local_digests.first().and_then(|d| {
+            d.split('@').nth(1).map(|s| s.to_string())
+        });
+
+        match get_registry_digest(&name, &tag).await {
+            Ok(remote_digest) => {
+                let has_update = match &local_digest {
+                    Some(ld) => *ld != remote_digest,
+                    None => true,
+                };
+                results.push(ImageUpdateInfo {
+                    image: image_str.clone(),
+                    current_digest: local_digest,
+                    has_update,
+                    error: None,
+                });
+            }
+            Err(e) => {
+                results.push(ImageUpdateInfo {
+                    image: image_str.clone(),
+                    current_digest: local_digest,
+                    has_update: false,
+                    error: Some(e),
+                });
+            }
+        }
+    }
+
+    Ok(results)
+}
+
+#[tauri::command]
+async fn update_container(
+    state: State<'_, DockerState>,
+    id: String,
+    on_progress: Channel<PullProgressEvent>,
+) -> Result<(), String> {
+    let docker = state.docker.lock().await;
+
+    let inspect = docker
+        .inspect_container(&id, None)
+        .await
+        .map_err(|e| format!("Failed to inspect container: {}", e))?;
+
+    let config = inspect.config.ok_or("No container config found")?;
+    let image_name = config.image.clone().ok_or("No image name in config")?;
+    let host_config = inspect.host_config.clone();
+
+    use futures_util::StreamExt;
+    let mut pull_stream = docker.create_image(
+        Some(bollard::image::CreateImageOptions {
+            from_image: image_name.clone(),
+            ..Default::default()
+        }),
+        None,
+        None,
+    );
+
+    while let Some(result) = pull_stream.next().await {
+        match result {
+            Ok(info) => {
+                let _ = on_progress.send(PullProgressEvent {
+                    image: image_name.clone(),
+                    id: info.id.clone(),
+                    status: info.status.unwrap_or_default(),
+                    progress: info.progress.clone(),
+                    current: info.progress_detail.as_ref().and_then(|d| d.current.map(|v| v as u64)),
+                    total: info.progress_detail.as_ref().and_then(|d| d.total.map(|v| v as u64)),
+                    complete: false,
+                    error: None,
+                });
+            }
+            Err(e) => {
+                let _ = on_progress.send(PullProgressEvent {
+                    image: image_name.clone(),
+                    id: None,
+                    status: "error".to_string(),
+                    progress: None,
+                    current: None,
+                    total: None,
+                    complete: false,
+                    error: Some(format!("{}", e)),
+                });
+                return Err(format!("Pull failed: {}", e));
+            }
+        }
+    }
+
+    let _ = on_progress.send(PullProgressEvent {
+        image: image_name.clone(),
+        id: None,
+        status: "Pull complete".to_string(),
+        progress: None,
+        current: None,
+        total: None,
+        complete: true,
+        error: None,
+    });
+
+    docker
+        .stop_container(&id, None)
+        .await
+        .map_err(|e| format!("Failed to stop container: {}", e))?;
+
+    docker
+        .remove_container(
+            &id,
+            Some(RemoveContainerOptions {
+                force: true,
+                ..Default::default()
+            }),
+        )
+        .await
+        .map_err(|e| format!("Failed to remove old container: {}", e))?;
+
+    let container_name = inspect
+        .name
+        .as_deref()
+        .map(|n| n.trim_start_matches('/'))
+        .unwrap_or("updated-container");
+
+    let mut create_config = Config {
+        image: Some(image_name.clone()),
+        env: config.env.clone(),
+        cmd: config.cmd.clone(),
+        exposed_ports: config.exposed_ports.clone(),
+        labels: config.labels.clone(),
+        working_dir: config.working_dir.clone(),
+        entrypoint: config.entrypoint.clone(),
+        volumes: config.volumes.clone(),
+        host_config: host_config,
+        ..Default::default()
+    };
+
+    let _ = create_config.image.as_ref();
+
+    let create_opts = CreateContainerOptions {
+        name: container_name,
+        ..Default::default()
+    };
+
+    let new_container = docker
+        .create_container(Some(create_opts), create_config)
+        .await
+        .map_err(|e| format!("Failed to create new container: {}", e))?;
+
+    docker
+        .start_container(&new_container.id, None::<StartContainerOptions<String>>)
+        .await
+        .map_err(|e| format!("Failed to start new container: {}", e))?;
+
+    Ok(())
+}
+
 fn try_connect_podman() -> Option<Docker> {
     let podman_paths = get_podman_socket_paths();
     
@@ -1456,6 +1725,8 @@ fn main() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .manage(DockerState {
             docker: Arc::new(Mutex::new(docker)),
             runtime: Arc::new(Mutex::new(runtime)),
@@ -1496,6 +1767,8 @@ fn main() {
             write_terminal,
             resize_terminal,
             close_terminal,
+            check_image_updates,
+            update_container,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

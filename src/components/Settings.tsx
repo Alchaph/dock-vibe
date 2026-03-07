@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ToastType } from './Toast';
 import './Settings.css';
 
@@ -21,22 +21,33 @@ function Settings({ darkMode, onToggleDarkMode, onToast }: SettingsProps) {
     const saved = localStorage.getItem('confirmDestructive');
     return saved ? JSON.parse(saved) : true;
   });
+  const [appVersion, setAppVersion] = useState('1.0.0');
+
+  useEffect(() => {
+    import('@tauri-apps/api/app')
+      .then((mod) => mod.getVersion())
+      .then((v) => setAppVersion(v))
+      .catch(() => { /* running in test/browser */ });
+  }, []);
 
   const handleRefreshIntervalChange = (value: number) => {
     setRefreshInterval(value);
     localStorage.setItem('refreshInterval', String(value));
+    window.dispatchEvent(new Event('refreshIntervalChanged'));
     onToast('success', `Refresh interval set to ${value}s`);
   };
 
   const handleShowAllDefaultChange = (value: boolean) => {
     setShowAllDefault(value);
     localStorage.setItem('showAllDefault', JSON.stringify(value));
+    window.dispatchEvent(new Event('showAllDefaultChanged'));
     onToast('success', value ? 'Showing all containers by default' : 'Showing running containers by default');
   };
 
   const handleConfirmDestructiveChange = (value: boolean) => {
     setConfirmDestructive(value);
     localStorage.setItem('confirmDestructive', JSON.stringify(value));
+    window.dispatchEvent(new Event('confirmDestructiveChanged'));
     onToast('success', value ? 'Confirmation dialogs enabled' : 'Confirmation dialogs disabled');
   };
 
@@ -110,7 +121,7 @@ function Settings({ darkMode, onToggleDarkMode, onToast }: SettingsProps) {
             <label>Dock</label>
             <p className="setting-description">Modern cross-platform Docker GUI Manager</p>
           </div>
-          <span className="setting-value">v1.0.0</span>
+          <span className="setting-value">v{appVersion}</span>
         </div>
       </div>
     </div>

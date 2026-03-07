@@ -133,3 +133,10 @@ export interface ContainerStatsEntry {
   network_rx: number;
   network_tx: number;
 }
+
+export interface ImageUpdateInfo {
+  image: string;
+  currentDigest: string | null;
+  hasUpdate: boolean;
+  error: string | null;
+}

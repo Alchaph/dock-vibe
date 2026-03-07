@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { dockerApi } from '../api';
+import { useRefreshInterval } from '../hooks/useRefreshInterval';
 import type { ImageInfo } from '../types';
 import RegistrySearch from './RegistrySearch';
 import { ConfirmModal } from './ConfirmModal';
@@ -34,9 +35,13 @@ function ImageList({ onPullImage, onDeploy }: ImageListProps) {
     }
   };
 
+  const refreshMs = useRefreshInterval();
+
   useEffect(() => {
     loadImages();
-  }, []);
+    const interval = setInterval(loadImages, refreshMs);
+    return () => clearInterval(interval);
+  }, [refreshMs]);
 
   const handleRemoveImage = (id: string, repoTags: string[]) => {
     const tagName = repoTags[0] || id.substring(0, 12);

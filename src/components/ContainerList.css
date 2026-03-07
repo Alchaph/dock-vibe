@@ -293,3 +293,38 @@
 .action-buttons .btn-sm {
   min-width: 70px;
 }
+
+.check-updates-btn {
+  background-color: var(--metro-teal);
+  color: var(--text-on-accent);
+  font-size: 12px;
+  padding: 0.4rem 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.check-updates-btn:hover:not(:disabled) {
+  filter: brightness(0.9);
+}
+
+.check-updates-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.update-badge {
+  display: inline-block;
+  background-color: var(--metro-orange);
+  color: var(--text-on-accent);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  margin-left: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  vertical-align: middle;
+}

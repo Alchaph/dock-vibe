@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { dockerApi } from './api';
+import { useRefreshInterval } from './hooks/useRefreshInterval';
 import type { ContainerInfo, ContainerDetails } from './types';
 import ContainerList from './components/ContainerList';
 import ContainerDetailsView from './components/ContainerDetailsView';
@@ -15,6 +16,7 @@ import Terminal from './components/Terminal';
 import SystemPrune from './components/SystemPrune';
 import ResourceDashboard from './components/ResourceDashboard';
 import Settings from './components/Settings';
+import UpdateBanner from './components/UpdateBanner';
 import { Toast, type ToastMessage, type ToastType } from './components/Toast';
 import { ConfirmModal } from './components/ConfirmModal';
 import './App.css';
@@ -26,7 +28,10 @@ function App() {
   const [selectedContainer, setSelectedContainer] = useState<string | null>(null);
   const [containerDetails, setContainerDetails] = useState<ContainerDetails | null>(null);
   const [currentView, setCurrentView] = useState<View>('templates');
-  const [showAll, setShowAll] = useState(false);
+  const [showAll, setShowAll] = useState(() => {
+    const saved = localStorage.getItem('showAllDefault');
+    return saved ? JSON.parse(saved) : false;
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dockerConnected, setDockerConnected] = useState(false);
@@ -45,6 +50,9 @@ function App() {
   const [confirmState, setConfirmState] = useState<{ isOpen: boolean; id: string | null }>({ isOpen: false, id: null });
   const [containerRuntime, setContainerRuntime] = useState<string>('docker');
   const [actionLoading, setActionLoading] = useState<Record<string, string>>({});
+  const [imageUpdates, setImageUpdates] = useState<Record<string, boolean>>({});
+  const [checkingUpdates, setCheckingUpdates] = useState(false);
+  const refreshMs = useRefreshInterval();
 
   const addToast = (type: ToastType, message: string) => {
     const id = Math.random().toString(36).substring(2, 9);
@@ -100,15 +108,15 @@ function App() {
     }
   };
 
-  // Auto-refresh every 5 seconds
+  // Auto-refresh using configurable interval
   useEffect(() => {
     if (!dockerConnected) return;
     
     loadContainers();
-    const interval = setInterval(loadContainers, 5000);
+    const interval = setInterval(loadContainers, refreshMs);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showAll, dockerConnected]);
+  }, [showAll, dockerConnected, refreshMs]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -283,6 +291,59 @@ function App() {
     }
   };
 
+  const handleCheckUpdates = async () => {
+    setCheckingUpdates(true);
+    try {
+      const uniqueImages = [...new Set(containers.map(c => c.image))];
+      const results = await dockerApi.checkImageUpdates(uniqueImages);
+      const updates: Record<string, boolean> = {};
+      let updateCount = 0;
+      for (const r of results) {
+        if (r.hasUpdate) {
+          updates[r.image] = true;
+          updateCount++;
+        }
+      }
+      setImageUpdates(updates);
+      if (updateCount > 0) {
+        addToast('info', `${updateCount} image update${updateCount > 1 ? 's' : ''} available`);
+      } else {
+        addToast('success', 'All images are up to date');
+      }
+    } catch (err) {
+      addToast('error', err instanceof Error ? err.message : 'Failed to check for updates');
+    } finally {
+      setCheckingUpdates(false);
+    }
+  };
+
+  const handleUpdateContainer = async (id: string) => {
+    setActionLoading((prev) => ({ ...prev, [id]: 'update' }));
+    try {
+      await dockerApi.updateContainer(id, (event) => {
+        if (event.error) {
+          setError(event.error);
+        }
+      });
+      await loadContainers();
+      setImageUpdates((prev) => {
+        const next = { ...prev };
+        const container = containers.find(c => c.id === id);
+        if (container) delete next[container.image];
+        return next;
+      });
+      addToast('success', 'Container updated successfully');
+    } catch (err) {
+      addToast('error', err instanceof Error ? err.message : 'Failed to update container');
+    } finally {
+      setActionLoading((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    }
+  };
+
   const handleDeployFromRegistry = async (imageName: string) => {
     setPullingImage(imageName);
     setPullStatus('Pulling...');
@@ -446,6 +507,7 @@ function App() {
       </aside>
 
       <div className="main-content">
+        <UpdateBanner />
         <header className="content-header">
           <div className="breadcrumbs">
             {currentView === 'templates' && (
@@ -494,6 +556,10 @@ function App() {
                 <span className="breadcrumb-current">Terminal</span>
               </>
             )}
+          </div>
+          <div className="auto-refresh-indicator">
+            <span className="pulse-dot"></span>
+            <span className="refresh-label">Live</span>
           </div>
           <div className="header-controls">
             {currentView === 'list' && (
@@ -550,6 +616,9 @@ function App() {
             onViewLogs={handleViewLogs}
             loading={loading}
             actionLoading={actionLoading}
+            imageUpdates={imageUpdates}
+            onCheckUpdates={handleCheckUpdates}
+            checkingUpdates={checkingUpdates}
           />
         )}
 
@@ -558,6 +627,8 @@ function App() {
             details={containerDetails}
             onAction={handleContainerAction}
             actionLoading={actionLoading}
+            updateAvailable={!!imageUpdates[containerDetails.image]}
+            onUpdate={handleUpdateContainer}
           />
         )}
 

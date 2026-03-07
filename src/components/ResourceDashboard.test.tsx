@@ -43,11 +43,13 @@ const mockStats = [
 beforeEach(() => {
   vi.clearAllMocks();
   vi.useFakeTimers();
+  localStorage.setItem('refreshInterval', '3');
   mockInvoke.mockResolvedValue(mockStats);
 });
 
 afterEach(() => {
   vi.useRealTimers();
+  localStorage.clear();
 });
 
 describe('ResourceDashboard', () => {

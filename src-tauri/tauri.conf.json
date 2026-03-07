@@ -21,13 +21,14 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' blob:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://hub.docker.com https://registry.hub.docker.com",
+      "csp": "default-src 'self' blob:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://hub.docker.com https://registry.hub.docker.com https://github.com https://api.github.com https://objects.githubusercontent.com https://auth.docker.io https://registry-1.docker.io",
       "dangerousDisableAssetCspModification": false
     }
   },
   "bundle": {
     "active": true,
     "targets": "all",
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -65,6 +66,12 @@
   "plugins": {
     "shell": {
       "open": true
+    },
+    "updater": {
+      "endpoints": [
+        "https://github.com/{{owner}}/{{repo}}/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDYyNDNENzE1MDA4NkNCRjMKUldUenk0WUFGZGREWWlyOEIzTXA3RlpuckFBblJxa0RNdXkxSVhNdjRWdGpLRUxaZjhxRGYrZXkK"
     }
   }
 }

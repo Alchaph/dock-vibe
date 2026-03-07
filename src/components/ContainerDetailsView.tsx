@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { openInBrowser } from '../utils';
+import { useRefreshInterval } from '../hooks/useRefreshInterval';
 import type { ContainerDetails, ContainerStats } from '../types';
 import { dockerApi } from '../api';
 import './ContainerDetails.css';
@@ -8,11 +9,14 @@ interface ContainerDetailsViewProps {
   details: ContainerDetails;
   onAction: (action: string, id: string) => void;
   actionLoading?: Record<string, string>;
+  updateAvailable?: boolean;
+  onUpdate?: (id: string) => void;
 }
 
-const ContainerDetailsView = ({ details, onAction, actionLoading = {} }: ContainerDetailsViewProps) => {
+const ContainerDetailsView = ({ details, onAction, actionLoading = {}, updateAvailable, onUpdate }: ContainerDetailsViewProps) => {
   const [stats, setStats] = useState<ContainerStats | null>(null);
   const [statsError, setStatsError] = useState<string | null>(null);
+  const refreshMs = useRefreshInterval();
 
   useEffect(() => {
     const loadStats = async () => {
@@ -31,9 +35,9 @@ const ContainerDetailsView = ({ details, onAction, actionLoading = {} }: Contain
     };
 
     loadStats();
-    const interval = setInterval(loadStats, 5000);
+    const interval = setInterval(loadStats, refreshMs);
     return () => clearInterval(interval);
-  }, [details.id, details.state]);
+  }, [details.id, details.state, refreshMs]);
 
   const formatBytes = (bytes: number): string => {
     const mb = bytes / (1024 * 1024);
@@ -46,6 +50,20 @@ const ContainerDetailsView = ({ details, onAction, actionLoading = {} }: Contain
     <div className="container-details">
       <div className="details-header">
         <h2>{details.name}</h2>
+        {updateAvailable && (
+          <div className="update-banner">
+            <span>Image update available</span>
+            {onUpdate && (
+              <button
+                className="btn btn-sm btn-primary"
+                onClick={() => onUpdate(details.id)}
+                disabled={!!actionLoading[details.id]}
+              >
+                Update Container
+              </button>
+            )}
+          </div>
+        )}
         <div className="details-actions">
           <button
             onClick={() => onAction('start', details.id)}

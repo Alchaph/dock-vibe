@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { dockerApi } from '../api';
+import { useRefreshInterval } from '../hooks/useRefreshInterval';
 import type { VolumeInfo } from '../types';
 import { ConfirmModal } from './ConfirmModal';
 import './VolumeList.css';
@@ -27,9 +28,13 @@ function VolumeList() {
     }
   };
 
+  const refreshMs = useRefreshInterval();
+
   useEffect(() => {
     loadVolumes();
-  }, []);
+    const interval = setInterval(loadVolumes, refreshMs);
+    return () => clearInterval(interval);
+  }, [refreshMs]);
 
   const handleCreateVolume = async (e: React.FormEvent) => {
     e.preventDefault();
