@@ -68,3 +68,54 @@
   background: white;
   transition: width 0.3s ease;
 }
+
+/* ================================================
+   GRAPHIC REALISM OVERRIDES
+   ================================================ */
+body.theme-realism .update-banner {
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  border-bottom: 2px solid var(--border-color);
+  box-shadow: none;
+}
+
+body.theme-realism .update-banner-text {
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+body.theme-realism .update-banner .btn-primary {
+  border-radius: 0;
+  border: 2px solid currentColor;
+  font-weight: 700;
+}
+
+body.theme-realism .update-banner .btn-primary:hover {
+  background: transparent;
+  color: white;
+  border-color: white;
+}
+
+body.theme-realism .update-banner .btn-secondary {
+  border-radius: 0;
+  border: 2px solid currentColor;
+  font-weight: 700;
+}
+
+body.theme-realism .update-banner .btn-secondary:hover {
+  background: white;
+  color: var(--metro-cobalt, #0050ef);
+}
+
+body.theme-realism .update-banner-error .btn-secondary:hover {
+  color: var(--metro-red, #e51400);
+}
+
+body.theme-realism .update-progress-bar {
+  border-radius: 0;
+}
+
+body.theme-realism .update-progress-fill {
+  border-radius: 0;
+}

@@ -85,3 +85,35 @@
   background-color: var(--bg-secondary);
   border-top: 1px solid var(--border-color);
 }
+
+/* ================================================
+   GRAPHIC REALISM OVERRIDES
+   ================================================ */
+body.theme-realism .confirm-modal-content {
+  box-shadow: none;
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+}
+
+body.theme-realism .confirm-modal-header h2 {
+  font-family: 'Archivo Black', sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+body.theme-realism .confirm-modal-close {
+  border-radius: 0;
+}
+
+body.theme-realism .confirm-modal-close:hover {
+  background-color: transparent;
+  border: 2px solid currentColor;
+}
+
+body.theme-realism .confirm-modal-body {
+  font-family: 'Space Mono', monospace;
+}
+
+body.theme-realism .confirm-modal-actions {
+  border-radius: 0;
+}

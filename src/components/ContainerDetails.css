@@ -252,3 +252,58 @@
 .update-banner .btn {
   margin-left: 1rem;
 }
+
+/* ================================================
+   GRAPHIC REALISM OVERRIDES
+   ================================================ */
+
+body.theme-realism .details-header {
+  font-family: 'Space Mono', monospace;
+}
+
+body.theme-realism .details-header h2 {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  font-family: 'Archivo Black', sans-serif;
+}
+
+body.theme-realism .details-section {
+  border-radius: 0;
+  box-shadow: none;
+  border: 2px solid var(--border-color);
+}
+
+body.theme-realism .details-section h3 {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  font-family: 'Archivo Black', sans-serif;
+}
+
+body.theme-realism .stat-card {
+  border-left: none;
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body.theme-realism .info-table th {
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  font-size: 11px;
+  text-transform: uppercase;
+  font-family: 'Space Mono', monospace;
+}
+
+body.theme-realism .env-item {
+  border-radius: 0;
+  border: 2px solid var(--border-color);
+  box-shadow: none;
+}
+
+body.theme-realism .update-banner {
+  border-radius: 0;
+  box-shadow: none;
+  border: 2px solid var(--metro-orange);
+}

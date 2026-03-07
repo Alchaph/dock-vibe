@@ -168,3 +168,46 @@
   max-width: 50%;
   text-align: right;
 }
+
+/* ================================================
+   GRAPHIC REALISM OVERRIDES
+   ================================================ */
+body.theme-realism .image-list-header {
+  font-weight: 700;
+  border-radius: 0;
+}
+
+body.theme-realism .image-list-header h2 {
+  font-weight: 800;
+  font-family: 'Archivo Black', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+body.theme-realism .images-table th {
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  font-size: 11px;
+}
+
+body.theme-realism .search-input {
+  border-radius: 0;
+  border: 2px solid var(--border-color);
+  box-shadow: none;
+}
+
+body.theme-realism .pull-banner {
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body.theme-realism .pull-banner-text {
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+body.theme-realism .error-message,
+body.theme-realism .info-message {
+  border-radius: 0;
+  box-shadow: none;
+}

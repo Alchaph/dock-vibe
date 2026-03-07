@@ -95,3 +95,57 @@
   color: var(--text-secondary);
   border: 2px solid var(--border-color);
 }
+
+/* ================================================
+   GRAPHIC REALISM OVERRIDES
+   ================================================ */
+
+body.theme-realism .settings-section {
+  border-radius: 0;
+  box-shadow: none;
+  border: 2px solid var(--border-color);
+}
+
+body.theme-realism .settings-section h2 {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  font-family: 'Archivo Black', sans-serif;
+}
+
+body.theme-realism .setting-item {
+  border-radius: 0;
+  border-bottom: 2px solid var(--border-color);
+}
+
+body.theme-realism .setting-info label {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+}
+
+body.theme-realism .setting-select {
+  border-radius: 0;
+  border: 2px solid var(--border-color);
+  box-shadow: none;
+}
+
+body.theme-realism .toggle-btn {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body.theme-realism .toggle-on {
+  border: 2px solid var(--border-color);
+}
+
+body.theme-realism .toggle-on:hover {
+  background-color: transparent;
+  color: var(--metro-green);
+  border: 2px solid var(--metro-green);
+}
+
+body.theme-realism .toggle-off {
+  border-radius: 0;
+}

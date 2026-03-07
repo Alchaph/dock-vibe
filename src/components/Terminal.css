@@ -59,3 +59,39 @@
   text-align: center;
   font-size: 14px;
 }
+
+/* ================================================
+   GRAPHIC REALISM OVERRIDES
+   ================================================ */
+body.theme-realism .terminal-container {
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+}
+
+body.theme-realism .terminal-header {
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  font-size: 11px;
+  border-radius: 0;
+}
+
+body.theme-realism .terminal-close-btn {
+  border-radius: 0;
+}
+
+body.theme-realism .terminal-close-btn:hover {
+  opacity: 1;
+  background-color: var(--metro-red);
+}
+
+body.theme-realism .terminal-error {
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+  font-weight: 600;
+}
+
+body.theme-realism .terminal-connecting {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}

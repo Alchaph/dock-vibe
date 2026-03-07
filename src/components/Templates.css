@@ -328,3 +328,98 @@
     font-size: 0.85rem;
   }
 }
+
+/* ================================================
+   GRAPHIC REALISM OVERRIDES
+   ================================================ */
+
+body.theme-realism .templates-header h2 {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  font-family: 'Archivo Black', sans-serif;
+}
+
+body.theme-realism .templates-categories {
+  border-radius: 0;
+}
+
+body.theme-realism .category-btn {
+  border-radius: 0;
+  box-shadow: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+body.theme-realism .category-btn.active {
+  border: 2px solid var(--border-color);
+}
+
+body.theme-realism .template-card {
+  border-radius: 0;
+  box-shadow: none;
+  border: 2px solid var(--border-color);
+}
+
+body.theme-realism .template-card:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--metro-blue);
+}
+
+body.theme-realism .template-icon {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body.theme-realism .template-info h3 {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  font-family: 'Archivo Black', sans-serif;
+}
+
+body.theme-realism .template-tag {
+  border-radius: 0;
+  box-shadow: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+body.theme-realism .btn-use-template {
+  border-radius: 0;
+  box-shadow: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+body.theme-realism .btn-use-template:hover {
+  background-color: transparent;
+  color: var(--metro-orange);
+  border: 2px solid var(--metro-orange);
+}
+
+body.theme-realism .btn-template-action {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body.theme-realism .btn-delete:hover {
+  background-color: transparent;
+  color: var(--metro-red);
+  border: 2px solid var(--metro-red);
+}
+
+body.theme-realism .btn-export:hover {
+  background-color: transparent;
+  color: var(--metro-blue);
+  border: 2px solid var(--metro-blue);
+}
+
+body.theme-realism .templates-search-input {
+  border-radius: 0;
+  border: 2px solid var(--border-color);
+  box-shadow: none;
+}

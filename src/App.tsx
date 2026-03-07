@@ -39,6 +39,10 @@ function App() {
     const saved = localStorage.getItem('darkMode');
     return saved ? JSON.parse(saved) : false;
   });
+  const [theme, setTheme] = useState<'metro' | 'realism'>(() => {
+    const saved = localStorage.getItem('theme');
+    return saved === 'realism' ? 'realism' : 'metro';
+  });
   const [showPullImage, setShowPullImage] = useState(false);
   const [showCreateContainer, setShowCreateContainer] = useState(false);
   const [showComposeUpload, setShowComposeUpload] = useState(false);
@@ -72,6 +76,16 @@ function App() {
     }
     localStorage.setItem('darkMode', JSON.stringify(darkMode));
   }, [darkMode]);
+
+  // Apply theme class to body
+  useEffect(() => {
+    if (theme === 'realism') {
+      document.body.classList.add('theme-realism');
+    } else {
+      document.body.classList.remove('theme-realism');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   const checkDockerConnection = async () => {
     try {
@@ -557,10 +571,7 @@ function App() {
               </>
             )}
           </div>
-          <div className="auto-refresh-indicator">
-            <span className="pulse-dot"></span>
-            <span className="refresh-label">Live</span>
-          </div>
+
           <div className="header-controls">
             {currentView === 'list' && (
               <>
@@ -671,6 +682,8 @@ function App() {
           <Settings
             darkMode={darkMode}
             onToggleDarkMode={() => setDarkMode(!darkMode)}
+            theme={theme}
+            onChangeTheme={setTheme}
             onToast={addToast}
           />
         )}

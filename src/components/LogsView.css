@@ -206,3 +206,75 @@ body.dark-mode .logs-container {
   font-size: 13px;
   font-weight: 600;
 }
+
+/* ================================================
+   GRAPHIC REALISM OVERRIDES
+   ================================================ */
+body.theme-realism .logs-header {
+  border: 2px solid var(--border-color);
+  border-left: 6px solid var(--metro-teal);
+  border-radius: 0;
+}
+
+body.theme-realism .logs-header h2 {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-family: 'Archivo Black', sans-serif;
+}
+
+body.theme-realism .search-input {
+  font-family: 'Space Mono', monospace;
+  border-radius: 0;
+}
+
+body.theme-realism .search-input:focus {
+  border-color: var(--metro-teal);
+  box-shadow: none;
+}
+
+body.theme-realism .tail-label {
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+body.theme-realism .tail-select {
+  font-family: 'Space Mono', monospace;
+  border-radius: 0;
+}
+
+body.theme-realism .search-info {
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+body.theme-realism .logs-container {
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+  background-color: #1E1E1E;
+}
+
+body.theme-realism .logs-content {
+  font-size: 13px;
+}
+
+body.theme-realism .logs-content mark {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body.theme-realism .logs-content::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+body.theme-realism .logs-content::-webkit-scrollbar-thumb {
+  border-radius: 0;
+  border: none;
+}
+
+body.theme-realism .error-message {
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+}

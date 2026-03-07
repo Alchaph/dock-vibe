@@ -290,3 +290,90 @@
 .btn-deploy:hover {
   opacity: 0.9;
 }
+
+/* ================================================
+   GRAPHIC REALISM OVERRIDES
+   ================================================ */
+body.theme-realism .registry-search-modal {
+  box-shadow: none;
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+}
+
+body.theme-realism .registry-search-header h2 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-family: 'Archivo Black', sans-serif;
+}
+
+body.theme-realism .close-button:hover {
+  background-color: transparent;
+  color: var(--text-on-accent);
+  opacity: 0.8;
+}
+
+body.theme-realism .search-input {
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+}
+
+body.theme-realism .search-input:focus {
+  border-color: var(--metro-blue);
+  box-shadow: none;
+}
+
+body.theme-realism .btn-search {
+  border: 2px solid transparent;
+}
+
+body.theme-realism .btn-search:hover:not(:disabled) {
+  background-color: transparent;
+  color: var(--metro-blue);
+  border: 2px solid var(--metro-blue);
+}
+
+body.theme-realism .result-card {
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+}
+
+body.theme-realism .result-card:hover {
+  border-color: var(--metro-blue);
+  box-shadow: none;
+}
+
+body.theme-realism .badge {
+  border-radius: 0;
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 1px;
+}
+
+body.theme-realism .btn-pull {
+  border: 2px solid transparent;
+}
+
+body.theme-realism .btn-pull:hover {
+  background-color: transparent;
+  color: var(--metro-green);
+  border: 2px solid var(--metro-green);
+  opacity: 1;
+}
+
+body.theme-realism .btn-deploy {
+  border: 2px solid transparent;
+}
+
+body.theme-realism .btn-deploy:hover {
+  background-color: transparent;
+  color: var(--metro-blue);
+  border: 2px solid var(--metro-blue);
+  opacity: 1;
+}
+
+body.theme-realism .results-header h3 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-family: 'Archivo Black', sans-serif;
+  text-transform: uppercase;
+}

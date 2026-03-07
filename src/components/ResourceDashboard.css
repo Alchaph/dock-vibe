@@ -169,3 +169,62 @@
 .dashboard-retry-btn:hover {
   opacity: 0.9;
 }
+
+/* ================================================
+   GRAPHIC REALISM OVERRIDES
+   ================================================ */
+
+body.theme-realism .dashboard-header {
+  border-radius: 0;
+  box-shadow: none;
+  border: 2px solid var(--border-color);
+}
+
+body.theme-realism .dashboard-title {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  font-family: 'Archivo Black', sans-serif;
+}
+
+body.theme-realism .dashboard-summary {
+  border-radius: 0;
+  box-shadow: none;
+  border: 2px solid var(--border-color);
+}
+
+body.theme-realism .dashboard-table th {
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  font-size: 11px;
+  text-transform: uppercase;
+  font-family: 'Space Mono', monospace;
+}
+
+body.theme-realism .dashboard-progress-container {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body.theme-realism .dashboard-container-name {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: 'Space Mono', monospace;
+}
+
+body.theme-realism .dashboard-loading,
+body.theme-realism .dashboard-error,
+body.theme-realism .dashboard-empty {
+  border-radius: 0;
+  box-shadow: none;
+  border: 2px solid var(--border-color);
+}
+
+body.theme-realism .dashboard-retry-btn {
+  border-radius: 0;
+  box-shadow: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+}

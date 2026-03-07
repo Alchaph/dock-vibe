@@ -76,3 +76,26 @@
     opacity: 1;
   }
 }
+
+/* ================================================
+   GRAPHIC REALISM OVERRIDES
+   ================================================ */
+body.theme-realism .toast {
+  box-shadow: none;
+  border: 2px solid currentColor;
+  border-radius: 0;
+}
+
+body.theme-realism .toast-label {
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+body.theme-realism .toast-message {
+  font-family: 'Space Mono', monospace;
+}
+
+body.theme-realism .toast-close {
+  border-radius: 0;
+}

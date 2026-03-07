@@ -83,3 +83,46 @@
   text-align: right;
   font-weight: 600;
 }
+
+/* ================================================
+   GRAPHIC REALISM OVERRIDES
+   ================================================ */
+body.theme-realism .prune-warning {
+  font-weight: 600;
+}
+
+body.theme-realism .prune-option {
+  border: 2px solid var(--border-color);
+  padding: 10px;
+}
+
+body.theme-realism .prune-option:hover {
+  border-color: var(--metro-blue);
+}
+
+body.theme-realism .prune-volume-warning {
+  border: 2px solid var(--metro-red);
+  border-radius: 0;
+  font-weight: 600;
+}
+
+body.theme-realism .prune-summary {
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+}
+
+body.theme-realism .prune-summary-count {
+  font-weight: 700;
+}
+
+body.theme-realism .prune-summary-label {
+  letter-spacing: 2px;
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+}
+
+body.theme-realism .prune-table th {
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-family: 'Space Mono', monospace;
+}

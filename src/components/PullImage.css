@@ -136,3 +136,53 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ================================================
+   GRAPHIC REALISM OVERRIDES
+   ================================================ */
+body.theme-realism .modal-content {
+  box-shadow: none;
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+}
+
+body.theme-realism .modal-header h2 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-family: 'Archivo Black', sans-serif;
+}
+
+body.theme-realism .modal-header .close-btn:hover {
+  background-color: transparent;
+  color: var(--text-on-accent);
+  opacity: 0.8;
+}
+
+body.theme-realism .form-group label {
+  letter-spacing: 1px;
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+}
+
+body.theme-realism .form-input {
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+}
+
+body.theme-realism .form-input:focus {
+  border-color: var(--metro-blue);
+  box-shadow: none;
+}
+
+body.theme-realism .error-message {
+  border: 2px solid var(--border-color);
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+body.theme-realism .pull-status {
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+}

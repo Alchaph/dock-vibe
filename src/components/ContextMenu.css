@@ -107,3 +107,34 @@ body.dark-mode .context-menu {
   font-size: 14px;
   flex-shrink: 0;
 }
+
+/* ================================================
+   GRAPHIC REALISM OVERRIDES
+   ================================================ */
+body.theme-realism .context-menu {
+  box-shadow: none;
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+}
+
+body.theme-realism.dark-mode .context-menu {
+  box-shadow: none;
+}
+
+body.theme-realism .context-menu-name {
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+}
+
+body.theme-realism .context-menu-state {
+  font-family: 'Space Mono', monospace;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+body.theme-realism .context-menu-item {
+  font-family: 'Space Mono', monospace;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  border-radius: 0;
+}

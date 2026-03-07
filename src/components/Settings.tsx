@@ -5,10 +5,12 @@ import './Settings.css';
 interface SettingsProps {
   darkMode: boolean;
   onToggleDarkMode: () => void;
+  theme: 'metro' | 'realism';
+  onChangeTheme: (theme: 'metro' | 'realism') => void;
   onToast: (type: ToastType, message: string) => void;
 }
 
-function Settings({ darkMode, onToggleDarkMode, onToast }: SettingsProps) {
+function Settings({ darkMode, onToggleDarkMode, theme, onChangeTheme, onToast }: SettingsProps) {
   const [refreshInterval, setRefreshInterval] = useState(() => {
     const saved = localStorage.getItem('refreshInterval');
     return saved ? Number(saved) : 5;
@@ -51,10 +53,29 @@ function Settings({ darkMode, onToggleDarkMode, onToast }: SettingsProps) {
     onToast('success', value ? 'Confirmation dialogs enabled' : 'Confirmation dialogs disabled');
   };
 
+  const handleThemeChange = (newTheme: 'metro' | 'realism') => {
+    onChangeTheme(newTheme);
+    onToast('success', newTheme === 'metro' ? 'Theme: Metro' : 'Theme: Graphic Realism');
+  };
+
   return (
     <div className="settings-page">
       <div className="settings-section">
         <h2>Appearance</h2>
+        <div className="setting-item">
+          <div className="setting-info">
+            <label>Theme</label>
+            <p className="setting-description">Choose your visual style</p>
+          </div>
+          <select
+            value={theme}
+            onChange={(e) => handleThemeChange(e.target.value as 'metro' | 'realism')}
+            className="setting-select"
+          >
+            <option value="metro">Metro</option>
+            <option value="realism">Graphic Realism</option>
+          </select>
+        </div>
         <div className="setting-item">
           <div className="setting-info">
             <label>Dark Mode</label>

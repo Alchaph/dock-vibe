@@ -281,3 +281,113 @@
   color: #dc3545;
   font-size: 0.9rem;
 }
+
+/* ================================================
+   GRAPHIC REALISM OVERRIDES
+   ================================================ */
+body.theme-realism .compose-upload-modal {
+  box-shadow: none;
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+}
+
+body.theme-realism .compose-upload-header h2 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-family: 'Archivo Black', sans-serif;
+}
+
+body.theme-realism .close-button:hover {
+  background-color: transparent;
+  color: var(--text-on-accent);
+  opacity: 0.8;
+}
+
+body.theme-realism .file-upload-label {
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-family: 'Space Mono', monospace;
+}
+
+body.theme-realism .file-input {
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+}
+
+body.theme-realism .file-input:focus {
+  border-color: var(--metro-orange);
+  box-shadow: none;
+}
+
+body.theme-realism .yaml-preview h3 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-family: 'Archivo Black', sans-serif;
+  text-transform: uppercase;
+}
+
+body.theme-realism .yaml-preview pre {
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+}
+
+body.theme-realism .btn-primary {
+  border: 2px solid transparent;
+}
+
+body.theme-realism .btn-primary:hover:not(:disabled) {
+  background-color: transparent;
+  color: var(--metro-orange);
+  border: 2px solid var(--metro-orange);
+}
+
+body.theme-realism .btn-secondary {
+  border: 2px solid var(--border-color);
+}
+
+body.theme-realism .btn-secondary:hover:not(:disabled) {
+  background-color: transparent;
+  border-color: var(--text-primary);
+}
+
+body.theme-realism .error-message {
+  border: 2px solid var(--border-color);
+  border-left: 2px solid var(--border-color);
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+body.theme-realism .deploy-results h3 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-family: 'Archivo Black', sans-serif;
+  text-transform: uppercase;
+}
+
+body.theme-realism .summary-stat {
+  border: 2px solid;
+  border-radius: 0;
+}
+
+body.theme-realism .summary-stat.success {
+  border-color: var(--metro-green);
+}
+
+body.theme-realism .summary-stat.failure {
+  border-color: var(--metro-red);
+}
+
+body.theme-realism .result-item {
+  border: 2px solid;
+  border-radius: 0;
+}
+
+body.theme-realism .result-item.success {
+  border-color: var(--metro-green);
+}
+
+body.theme-realism .result-item.failure {
+  border-color: var(--metro-red);
+}

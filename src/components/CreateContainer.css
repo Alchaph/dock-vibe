@@ -358,3 +358,95 @@
   transform: translateY(0);
   box-shadow: none;
 }
+
+/* ================================================
+   GRAPHIC REALISM OVERRIDES
+   ================================================ */
+body.theme-realism .form-section {
+  border: 2px solid var(--border-color);
+  border-left: 2px solid var(--border-color);
+}
+
+body.theme-realism .form-section h3 {
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-family: 'Space Mono', monospace;
+}
+
+body.theme-realism .form-group label {
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-family: 'Space Mono', monospace;
+}
+
+body.theme-realism .form-group input,
+body.theme-realism .form-group select {
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+}
+
+body.theme-realism .form-group input:focus,
+body.theme-realism .form-group select:focus {
+  border-color: var(--metro-blue);
+  box-shadow: none;
+}
+
+body.theme-realism .image-input-toggle .toggle-btn.active {
+  border-color: var(--metro-blue);
+}
+
+body.theme-realism .port-row input:focus {
+  border-color: var(--metro-blue);
+  box-shadow: none;
+}
+
+body.theme-realism .volume-row input[type="text"]:focus {
+  border-color: var(--metro-purple);
+  box-shadow: none;
+}
+
+body.theme-realism .checkbox-label {
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-family: 'Space Mono', monospace;
+}
+
+body.theme-realism .checkbox-label input[type="checkbox"] {
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+}
+
+body.theme-realism .checkbox-label input[type="checkbox"]:focus {
+  outline: none;
+  border-color: var(--metro-blue);
+  box-shadow: none;
+}
+
+body.theme-realism .env-row input:focus {
+  border-color: var(--metro-teal);
+  box-shadow: none;
+}
+
+body.theme-realism .btn-remove {
+  border: 2px solid transparent;
+}
+
+body.theme-realism .btn-remove:hover {
+  background-color: transparent;
+  color: var(--metro-red);
+  border: 2px solid var(--metro-red);
+}
+
+body.theme-realism .error-message {
+  border: 2px solid var(--border-color);
+  border-left: 2px solid var(--border-color);
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+body.theme-realism .btn-sm:hover:not(:disabled) {
+  box-shadow: none;
+  transform: none;
+}

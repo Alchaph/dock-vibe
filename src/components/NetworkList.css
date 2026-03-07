@@ -84,3 +84,44 @@
   margin-bottom: 1.5rem;
   border: none;
 }
+
+/* ================================================
+   GRAPHIC REALISM OVERRIDES
+   ================================================ */
+body.theme-realism .network-list-header {
+  border: 2px solid var(--border-color);
+  border-left: 6px solid var(--metro-teal);
+  border-radius: 0;
+}
+
+body.theme-realism .network-list-header h2 {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-family: 'Archivo Black', sans-serif;
+}
+
+body.theme-realism .networks-table {
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+}
+
+body.theme-realism .networks-table th {
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  font-size: 11px;
+}
+
+body.theme-realism .network-name {
+  font-weight: 600;
+}
+
+body.theme-realism .networks-table tbody tr:hover {
+  background-color: transparent;
+  outline: 2px solid var(--text-primary);
+  outline-offset: -2px;
+}
+
+body.theme-realism .error-message {
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+}
