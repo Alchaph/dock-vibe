@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { open } from '@tauri-apps/plugin-shell';
+import { openInBrowser } from '../utils';
+import ContextMenu from './ContextMenu';
 import type { ContainerInfo } from '../types';
 import './ContainerList.css';
 
@@ -14,6 +15,12 @@ interface ContainerListProps {
 
 const ContainerList = ({ containers, onAction, onViewDetails, onViewLogs, loading, actionLoading = {} }: ContainerListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; container: ContainerInfo } | null>(null);
+
+  const handleContextMenu = (e: React.MouseEvent, container: ContainerInfo) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY, container });
+  };
 
   const getStatusColor = (state: string) => {
     switch (state.toLowerCase()) {
@@ -131,7 +138,7 @@ const ContainerList = ({ containers, onAction, onViewDetails, onViewLogs, loadin
         </thead>
         <tbody>
           {filteredContainers.map((container) => (
-            <tr key={container.id}>
+            <tr key={container.id} onContextMenu={(e) => handleContextMenu(e, container)}>
               <td>
                 <span className={`status-indicator ${getStatusColor(container.state)}`}></span>
               </td>
@@ -159,7 +166,7 @@ const ContainerList = ({ containers, onAction, onViewDetails, onViewLogs, loadin
                           className="port-badge port-badge-link"
                           onClick={(e) => {
                             e.stopPropagation();
-                            open(`http://localhost:${port.public_port}`);
+                            openInBrowser(`http://localhost:${port.public_port}`);
                           }}
                           title={`Open http://localhost:${port.public_port} in browser`}
                         >
@@ -254,6 +261,19 @@ const ContainerList = ({ containers, onAction, onViewDetails, onViewLogs, loadin
           ))}
         </tbody>
       </table>
+      )}
+
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          container={contextMenu.container}
+          onAction={onAction}
+          onViewDetails={onViewDetails}
+          onViewLogs={onViewLogs}
+          onClose={() => setContextMenu(null)}
+          actionLoading={actionLoading}
+        />
       )}
     </div>
   );

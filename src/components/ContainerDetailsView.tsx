@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { open } from '@tauri-apps/plugin-shell';
+import { openInBrowser } from '../utils';
 import type { ContainerDetails, ContainerStats } from '../types';
 import { dockerApi } from '../api';
 import './ContainerDetails.css';
@@ -177,7 +177,7 @@ const ContainerDetailsView = ({ details, onAction, actionLoading = {} }: Contain
                       {port.public_port ? (
                         <button
                           className="btn btn-sm btn-primary"
-                          onClick={() => open(`http://localhost:${port.public_port}`)}
+                          onClick={() => openInBrowser(`http://localhost:${port.public_port}`)}
                           title={`Open http://localhost:${port.public_port}`}
                         >
                           Open

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { dockerApi } from '../api';
+import { downloadFile } from '../utils';
 import './LogsView.css';
 
 import type { ToastType } from './Toast';
@@ -60,15 +61,13 @@ const LogsView = ({ containerId, onToast }: LogsViewProps) => {
   };
 
   const openRawLogs = () => {
-    const blob = new Blob([logs], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `container-logs-${containerId.substring(0, 12)}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const filename = `container-logs-${containerId.substring(0, 12)}.txt`;
+    const success = downloadFile(logs, filename);
+    if (success) {
+      onToast('success', `Logs exported as ${filename}`);
+    } else {
+      onToast('error', 'Failed to export logs');
+    }
   };
 
   const copyLogs = async () => {

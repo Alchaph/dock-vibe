@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { ToastType } from './Toast';
 import { ConfirmModal } from './ConfirmModal';
+import { downloadFile } from '../utils';
 import './Templates.css';
 
 interface PortMapping {
@@ -1527,15 +1528,13 @@ function Templates({ onUseTemplate, onToast }: TemplatesProps) {
 
   const handleExportTemplate = (template: ContainerTemplate) => {
     const dataStr = JSON.stringify(template, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${template.id}-template.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const filename = `${template.id}-template.json`;
+    const success = downloadFile(dataStr, filename, 'application/json');
+    if (success) {
+      onToast('success', `Template "${template.name}" exported`);
+    } else {
+      onToast('error', 'Failed to export template');
+    }
   };
 
   const handleImportTemplate = () => {
@@ -1566,15 +1565,12 @@ function Templates({ onUseTemplate, onToast }: TemplatesProps) {
 
   const handleExportAll = () => {
     const dataStr = JSON.stringify(customTemplates, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'custom-templates.json';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const success = downloadFile(dataStr, 'custom-templates.json', 'application/json');
+    if (success) {
+      onToast('success', `Exported ${customTemplates.length} custom templates`);
+    } else {
+      onToast('error', 'Failed to export templates');
+    }
   };
 
 
